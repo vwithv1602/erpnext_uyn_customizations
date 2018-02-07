@@ -1,0 +1,3 @@
+License: license.txt
+####################################
+All rights belongs to UsedYetNew (www.usedyetnew.com)
