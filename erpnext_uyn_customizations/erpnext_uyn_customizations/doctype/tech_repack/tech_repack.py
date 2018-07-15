@@ -42,9 +42,11 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		# target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 		# 	or item.selling_cost_center \
 		# 	or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
-		target.barcode=source.barcode
 		target.s_warehouse=source.warehouse
 		target.item_code=source.item
+		target.qty="1"
+		target.uom='Nos'
+		target.conversion_factor='1'
 		target.serial_no=source.barcode
 	def update_taken_item(source, target, source_parent):
 		# target.amount = flt(source.amount) - flt(source.billed_amt)
@@ -94,6 +96,15 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		# 	"postprocess": update_item,
 		# 	# "condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
 		# },
+		"Tech Repack Items": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				# "name": "so_detail",
+				# "item_code": "item_code",
+			},
+			"postprocess": update_item,
+			# "condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
+		},
 		"Tech Repack Taken Items": {
 			"doctype": "Stock Entry Detail",
 			"field_map": {
