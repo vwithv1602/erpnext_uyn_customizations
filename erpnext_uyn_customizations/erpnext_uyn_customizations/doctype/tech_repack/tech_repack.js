@@ -53,7 +53,7 @@ switch(user){
 		default_source_warehouse = default_target_warehouse = "Tech Team - Uyn";
 	break;
 	case 'ayyanamanidiot@gmail.com':
-		default_source_warehouse = default_target_warehouse = "Ready To Ship - Uyn";
+		default_source_warehouse = default_target_warehouse = "Final QC & Packing - Uyn";
 	break;
 }
 frappe.ui.form.on('Tech Repack Items', {

@@ -19,6 +19,7 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		#Get the advance paid Journal Entries in Sales Invoice Advance
 		# target.set_advances()
 		target.purpose = "Repack"
+		target.reference_tech_repack_no = source_name
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
