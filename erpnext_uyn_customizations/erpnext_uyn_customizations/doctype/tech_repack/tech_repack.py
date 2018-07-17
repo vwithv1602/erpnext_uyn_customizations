@@ -9,9 +9,23 @@ from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_company_address
-from erpnext.vlog import vwrite
+from erpnext_ebay.vlog import vwrite
 class TechRepack(Document):
 	pass
+@frappe.whitelist()
+def close_tech_repack(stock_entry,method):
+	tr_no = stock_entry.__dict__.get("reference_tech_repack_no")
+	if tr_no:
+		tr_doc = frappe.get_doc("Tech Repack", tr_no)
+		tr_doc.status = "Closed"
+		tr_doc.save(ignore_permissions=True)
+@frappe.whitelist()
+def open_tech_repack(stock_entry,method):
+	tr_no = stock_entry.__dict__.get("reference_tech_repack_no")
+	if tr_no:
+		tr_doc = frappe.get_doc("Tech Repack", tr_no)
+		tr_doc.status = "Pending"
+		tr_doc.save(ignore_permissions=True)
 @frappe.whitelist()
 def make_repack(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
@@ -77,6 +91,17 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		target.qty=source.qty
 		target.uom='Nos'
 		target.conversion_factor='1'
+	def check_if_ste_exists(source):
+		try:
+			ste = frappe.db.sql(" select name from `tabStock Entry` where docstatus!='2' and reference_tech_repack_no='%s'" % source)
+			if len(ste) > 0:
+				return True # returing false as repack already happened
+		except Exception,e:
+			vwrite("Exception raised in check_if_ste_exists for Tech Repack: %s" % source)
+			return True
+	ste_exists = check_if_ste_exists(source_name)	
+	if ste_exists:
+		return False
 
 	doclist = get_mapped_doc("Tech Repack", source_name, {
 		"Tech Repack": {

@@ -5,16 +5,14 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on('Tech Repack', {
 	refresh: function(frm) {
-		frm.add_custom_button(__("Repack"), function() {
-			// var excise = frappe.model.make_new_doc_and_get_name('Journal Entry');
-			// excise = locals['Journal Entry'][excise];
-			// excise.voucher_type = 'Excise Entry';
-			// frappe.set_route('Form', 'Stock Entry', "New Stock Entry");
-			frappe.model.open_mapped_doc({
-				method: "erpnext_uyn_customizations.erpnext_uyn_customizations.doctype.tech_repack.tech_repack.make_repack",
-				frm: frm
-			})
-		}, __("Make"));
+		if(frm.doc.status=='Pending'){
+			frm.add_custom_button(__("Repack"), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext_uyn_customizations.erpnext_uyn_customizations.doctype.tech_repack.tech_repack.make_repack",
+					frm: frm
+				})
+			}, __("Make"));
+		}
 	},
 	barcode: function(frm){
 		if(frm.doc.barcode){
