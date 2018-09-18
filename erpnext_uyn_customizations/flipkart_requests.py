@@ -6,10 +6,11 @@ from .flipkart_exceptions import FlipkartError
 import requests,json
 from requests.auth import HTTPBasicAuth
 
-from vlog import vwrite
+from .vlog import vwrite
 
 urls = {
-    'list_orders': 'https://api.flipkart.net/sellers/v3/shipments/filter/'
+    'list_orders': 'https://api.flipkart.net/sellers/v3/shipments/filter/',
+    'shipment_id_details': 'https://api.flipkart.net/sellers/v3/shipments/'
 }
 def get_request(path,params):
     settings = get_flipkart_settings()
@@ -26,6 +27,14 @@ def get_request(path,params):
         payload = '{"filter" :{"type":"preDispatch","states":["APPROVED","PACKING_IN_PROGRESS","PACKED","FORM_FAILED","READY_TO_DISPATCH"]}}'
         headers = {"Content-Type": "application/json", "Authorization":authorization}
         r = requests.post(urls[path], data=payload, headers=headers)
+        content = r.__dict__.get("_content")
+        result = json.loads(content)
+        response = result.get("shipments")
+    elif path == 'shipment_id_details':
+        payload = '{}'
+        headers = {"Content-Type": "application/json", "Authorization":authorization}
+        url = "%s%s" % (urls[path],params.get("shipmentId"))
+        r = requests.get(url, headers=headers)
         content = r.__dict__.get("_content")
         result = json.loads(content)
         response = result.get("shipments")
