@@ -18,7 +18,6 @@ class ReadyToShip(object):
 	self.yesterday = self.datetime.strptime((self.datetime.today() + self.timedelta(-1)).strftime('%Y-%m-%d'), '%Y-%m-%d')
         
     def run(self, args):
-        vwrite("in vamc 1")
         data = self.get_data()
         max_len = 0
         len2 = 0
@@ -42,7 +41,6 @@ class ReadyToShip(object):
             # _("Qty") + ":Data:80",
             _("RTS") + ":Data:80" 
         ]
-        vwrite(max_len)
         return columns
 
     from datetime import timedelta,datetime
@@ -69,7 +67,7 @@ class ReadyToShip(object):
         else:
             count_column = " sed.qty as count "
         rts_sql = """ 
-        select %s,i.variant_of,sed.item_code,i.item_group,sed.qty,se.posting_date from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join `tabItem` i on i.item_code=sed.item_code where sed.t_warehouse = 'Ready To Ship - UYN' and i.variant_of<>'' %s;
+        select %s,i.variant_of,sed.item_code,i.item_group,sed.qty,se.posting_date from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join `tabItem` i on i.item_code=sed.item_code where sed.t_warehouse = 'G3 Ready To Ship - UYN' and i.variant_of<>'' %s;
         """ % (count_column,conditions)
         vwrite(rts_sql)
         for rts in frappe.db.sql(rts_sql,as_dict=1):

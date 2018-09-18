@@ -55,7 +55,7 @@ class ReadyToShipEnhancedDaily(object):
         data = []
         conditions = self.prepare_conditions()
         rts_sql = """ 
-        select sum(sed.qty) as count,i.variant_of,sed.item_code,i.item_group,sed.qty,se.posting_date from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join `tabItem` i on i.item_code=sed.item_code where sed.t_warehouse = 'Ready To Ship - UYN' and i.variant_of<>'' %s;
+        select sum(sed.qty) as count,i.variant_of,sed.item_code,i.item_group,sed.qty,se.posting_date from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join `tabItem` i on i.item_code=sed.item_code where sed.t_warehouse = 'G3 Ready To Ship - UYN' and i.variant_of<>'' %s;
         """ % (conditions)
         for rts in frappe.db.sql(rts_sql,as_dict=1):
             data.append([rts.get("variant_of"),rts.get("item_code"),rts.get("item_group"),rts.get("count")])

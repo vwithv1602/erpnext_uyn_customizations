@@ -61,17 +61,18 @@ class ReadyToShip(object):
     def get_non_variant_result_for_rts(self):
         result = []
         non_variant_rts_sql = """ 
-        select i.item_group as item_group,i.item_code as item_code,sum(sle.actual_qty) as "qty",i.variant_of from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse in ('Ready To Ship - Uyn','Ready To Ship - FZI') and i.variant_of is NULL and i.item_code<>'Fizzics Original' group by i.item_group,i.item_code
+        select i.item_group as item_group,i.item_code as item_code,sum(sle.actual_qty) as "qty",i.variant_of from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse in ('G3 Ready To Ship - Uyn','Ready To Ship - Uyn','Ready To Ship - FZI') and i.variant_of is NULL and i.item_code<>'Fizzics Original' group by i.item_group,i.item_code
         """
         
         for item in frappe.db.sql(non_variant_rts_sql,as_dict=1):
             other_non_variant_rts_sql = """ 
-            select i.item_group as item_group,i.item_code as item_code,sum(sle.actual_qty) as "qty",i.variant_of from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse not in ('Ready To Ship - Uyn','Ready To Ship - FZI') and i.variant_of is NULL and i.item_code='%s' group by i.item_group,i.item_code""" % item.get("item_code")
+            select i.item_group as item_group,i.item_code as item_code,sum(sle.actual_qty) as "qty",i.variant_of from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse not in ('G3 Ready To Ship - Uyn','Ready To Ship - Uyn','Ready To Ship - FZI') and i.variant_of is NULL and i.item_code='%s' group by i.item_group,i.item_code""" % item.get("item_code")
             grade_b_non_variant_rts_sql = """ 
             select i.item_group as item_group,i.item_code as item_code,sum(sle.actual_qty) as "qty",i.variant_of from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse in ('Ready To Ship Grade B - Uyn') and i.variant_of is NULL and i.item_code='%s' group by i.item_group,i.item_code""" % item.get("item_code")
             grade_b_non_variant_rts_res = frappe.db.sql(grade_b_non_variant_rts_sql,as_dict=1)
             other_qty_res = frappe.db.sql(other_non_variant_rts_sql,as_dict=1)
-	    other_qty = other_qty_res[0].get("qty")
+            if len(other_qty_res)>0:
+                other_qty = other_qty_res[0].get("qty")
             if len(grade_b_non_variant_rts_res)>0:
                 grade_b_qty = grade_b_non_variant_rts_res[0].get("qty")
             else:
@@ -86,7 +87,7 @@ class ReadyToShip(object):
     def get_variant_result_for_rts(self):
         result = []
         variant_rts_sql = """ 
-        select distinct i.item_code as item_code,i.variant_of as variant_of,i.item_group as item_group from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse in ('Ready To Ship - Uyn','Ready To Ship - FZI') and i.variant_of is NOT NULL and i.item_code<>'Fizzics Original'
+        select distinct i.item_code as item_code,i.variant_of as variant_of,i.item_group as item_group from `tabStock Ledger Entry` sle inner join `tabItem` i on i.item_code=sle.item_code where sle.warehouse in ('G3 Ready To Ship - Uyn','Ready To Ship - Uyn','Ready To Ship - FZI') and i.variant_of is NOT NULL and i.item_code<>'Fizzics Original'
         """
         variant_rts_res = frappe.db.sql(variant_rts_sql,as_dict=1)
         # for each item get non_replaceable_attr_vals
@@ -103,8 +104,8 @@ class ReadyToShip(object):
                 where_string += " and item_code like %s " % ('\'%'+attribute+'%\'')
                 nravs += "-%s" % attribute
             # Prepare the below query to get the balance
-            bal_sql = """ select sum(actual_qty) as bal_qty from `tabStock Ledger Entry` where item_code in (select distinct item_code from  `tabItem Variant Attribute` iva inner join tabItem i on i.item_code = iva.parent where i.variant_of ='%s' %s and i.item_code<>'Fizzics Original') and warehouse  in ('Ready To Ship - Uyn','Ready To Ship - FZI')""" %(item.get("variant_of"),where_string)
-            other_bal_sql = """ select sum(actual_qty) as bal_qty from `tabStock Ledger Entry` where item_code in (select distinct item_code from  `tabItem Variant Attribute` iva inner join tabItem i on i.item_code = iva.parent where i.variant_of ='%s' %s and i.item_code<>'Fizzics Original') and warehouse not in ('Ready To Ship - Uyn','Ready To Ship - FZI')""" %(item.get("variant_of"),where_string)
+            bal_sql = """ select sum(actual_qty) as bal_qty from `tabStock Ledger Entry` where item_code in (select distinct item_code from  `tabItem Variant Attribute` iva inner join tabItem i on i.item_code = iva.parent where i.variant_of ='%s' %s and i.item_code<>'Fizzics Original') and warehouse  in ('G3 Ready To Ship - Uyn','Ready To Ship - Uyn','Ready To Ship - FZI')""" %(item.get("variant_of"),where_string)
+            other_bal_sql = """ select sum(actual_qty) as bal_qty from `tabStock Ledger Entry` where item_code in (select distinct item_code from  `tabItem Variant Attribute` iva inner join tabItem i on i.item_code = iva.parent where i.variant_of ='%s' %s and i.item_code<>'Fizzics Original') and warehouse not in ('G3 Ready To Ship - Uyn','Ready To Ship - Uyn','Ready To Ship - FZI')""" %(item.get("variant_of"),where_string)
             grade_b_bal_sql = """ select sum(actual_qty) as bal_qty from `tabStock Ledger Entry` where item_code in (select distinct item_code from  `tabItem Variant Attribute` iva inner join tabItem i on i.item_code = iva.parent where i.variant_of ='%s' %s and i.item_code<>'Fizzics Original') and warehouse in ('Ready To Ship Grade B - Uyn')""" %(item.get("variant_of"),where_string)
             grade_b_bal_res = frappe.db.sql(grade_b_bal_sql, as_dict=1)
             grade_b_qty = grade_b_bal_res[0].get("bal_qty")
