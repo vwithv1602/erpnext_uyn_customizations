@@ -73,7 +73,7 @@ class OperationsProductivity(object):
         #week_end_date = '2018-05-25'
         custom_data = []
         if period=='yesterday':
-            condition = """ a.date >= (NOW()- INTERVAL 1 DAY) """
+            condition = """ a.date = (CURDATE()- INTERVAL 1 DAY) """
         elif period=='week':
             condition = """ a.date >= ('%s') and a.date < ('%s')""" %(self.weekstartdate,self.weekenddate)
         elif period=='month':
