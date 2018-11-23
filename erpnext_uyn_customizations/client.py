@@ -34,14 +34,16 @@ def get_check_list_based_on_inspection_type(doctype, fields=None, filters=None, 
 
 @frappe.whitelist()
 def get_doctype_details(doctype, fields=None, filters=None, order_by=None,limit_start=None, limit_page_length=20, parent=None):
-    filters = ast.literal_eval(filters)
+    # filters = ast.literal_eval(filters)
+    filters = json.loads(filters)
     where_string = ""
-    for key,value in filters.iteritems():
-        # vwrite("key: %s, value[0]: %s, value[1]: %s" %(key,value[0],value[1]))
-        if value[0] == ' in ':
-            where_string += " `%s` %s %s and" % (key,value[0],value[1])
-        else:
-            where_string += " `%s`%s'%s' and" % (key,value[0],value[1])
+    for filter_value in filters:
+        for key,value in filter_value.iteritems():
+            # vwrite("key: %s, value[0]: %s, value[1]: %s" %(key,value[0],value[1]))
+            if value[0] == ' in ':
+                where_string += " `%s` %s %s and" % (key,value[0],value[1])
+            else:
+                where_string += " `%s`%s'%s' and" % (key,value[0],value[1])
     
     where_string = where_string[:-3]
     # checks_sql = """ select %s from `tabItem Group Quality Checks` where %s and name in (select igqc.name from `tabQuality Check Inspection Type` qcit left join `tabItem Group Quality Checks` igqc on igqc.name=qcit.parent where qcit.inspection_type='%s')""" %(fields,where_string,inspection_type)
@@ -192,3 +194,90 @@ def get_item_attribute_abbr(attr=None,attr_val=None):
     abbr_dict = frappe.db.sql(abbr_sql,as_dict=1)
     abbr = abbr_dict[0].get("abbr")
     return abbr
+
+@frappe.whitelist()
+def get_stock_balance(warehouses=[],items=[]):
+    # used to get stock balance for selected items with warehouse filter
+    items = ast.literal_eval(items)
+    from datetime import datetime,timedelta
+    today = datetime.today()
+    to_date = str(datetime.today())[:10]
+    start_date = today - timedelta(365)
+    from_date = str(start_date)[:10]
+    filters = {'from_date':from_date,'to_date':to_date}
+    from erpnext.stock.report.stock_balance.stock_balance import get_stock_ledger_entries,get_item_warehouse_map
+    sle = get_stock_ledger_entries(filters,items)
+    iwb_map = get_item_warehouse_map(filters,sle)
+    result = {}
+    for (company, item, warehouse) in sorted(iwb_map):
+        qty_dict = iwb_map[(company, item, warehouse)]
+        if qty_dict.get("bal_qty")>0:
+            if not result.get(item):
+                result[item] = []
+            result[item].append({'warehouse':warehouse,'bal_qty':qty_dict.get("bal_qty")})
+    return result
+
+@frappe.whitelist()
+def get_spreadsheet_data(spreadsheet_id=None,sheet_name=None):
+    import gspread
+    from oauth2client.service_account import ServiceAccountCredentials
+    scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name("/home/frappe/frappe-bench/apps/erpnext_uyn_customizations/erpnext_uyn_customizations/usedyetnew-197716-ef945772629c.json",scope)
+
+    gc = gspread.authorize(credentials)
+
+    # wks = gc.open('gSpreadTest').sheet1
+    try:
+        # wks = gc.open_by_key('1kGiCe4CjMMduGvhCxOCVWgbsLmWVsCFTJOmGUiEpPO0').sheet1
+        sh = gc.open_by_key(spreadsheet_id)
+        wks = sh.worksheet(sheet_name)
+        result = wks.get_all_records()
+        return result
+    except Exception, e:
+        print "Exception raised in opening worksheet"
+        error = ast.literal_eval(e.message)
+        return error
+
+@frappe.whitelist()
+def import_data(doc):
+    doc = ast.literal_eval(doc)
+    spreadsheet_id = doc.get("spreadsheet_id")
+    sheet_name = doc.get("sheet_name")
+
+    spreadsheet_data = get_spreadsheet_data(spreadsheet_id,sheet_name)
+    mapper = doc.get("mapper")
+    for data in spreadsheet_data:
+        update_string = ""
+        for map in mapper:
+            if "field_name" in map:
+                column_name = map.get("column_name").strip()
+                field_name = map.get("field_name")
+                target_doctype = map.get("target_doctype")
+                foreign_key = map.get("foreign_key")
+                primary_key = map.get("primary_key")
+                formatted_data = {}
+                for k,d in data.iteritems():
+                    key = k.strip()
+                    formatted_data[key] = d
+                field_value = formatted_data[column_name]
+                primary_key_value = formatted_data[primary_key]
+                if field_name:
+                    update_string += " `{0}`='{1}',".format(field_name,field_value)
+        update_string = update_string[:-1]
+        sql = "Update `tab{1}` set {0} where `{2}`='{3}'".format(update_string,target_doctype,foreign_key,primary_key_value)
+        qry = frappe.db.sql(sql,as_dict=1)
+    return "OK"
+
+@frappe.whitelist()
+def get_initial_condition(barcode):
+    col_sql = """ SELECT GROUP_CONCAT(`COLUMN_NAME` SEPARATOR ', ') as req_cols FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='1bd3e0294da19198' AND `TABLE_NAME`='tabSerial No' and `COLUMN_NAME` like 'initial_%' """
+    col_qry = frappe.db.sql(col_sql,as_dict=1)
+    req_cols = col_qry[0].get("req_cols")
+    sql = """ select {0} from `tabSerial No` where name='{1}' """.format(req_cols,barcode)
+    qry = frappe.db.sql(sql, as_dict=1)
+    initial_condition = ""
+    for k,v in qry[0].iteritems():
+        if v:
+            initial_condition += "<b>{0}</b>: {1} <br>".format(k,v)
+    initial_condition = initial_condition.replace('_',' ').upper()
+    return initial_condition

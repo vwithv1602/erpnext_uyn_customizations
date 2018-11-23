@@ -90,6 +90,11 @@ app_license = "license.txt"
 # Scheduled Tasks
 # ---------------
 
+scheduler_events = {
+    "all": [
+		"erpnext_uyn_customizations.flipkart_api.sync_flipkart"
+	]
+}
 # scheduler_events = {
 # 	"all": [
 # 		"erpnext_uyn_customizations.tasks.all"

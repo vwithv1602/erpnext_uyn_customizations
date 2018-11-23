@@ -109,6 +109,7 @@ class ReadyToShip(object):
             grade_b_bal_sql = """ select sum(actual_qty) as bal_qty from `tabStock Ledger Entry` where item_code in (select distinct item_code from  `tabItem Variant Attribute` iva inner join tabItem i on i.item_code = iva.parent where i.variant_of ='%s' %s and i.item_code<>'Fizzics Original') and warehouse in ('Ready To Ship Grade B - Uyn')""" %(item.get("variant_of"),where_string)
             grade_b_bal_res = frappe.db.sql(grade_b_bal_sql, as_dict=1)
             grade_b_qty = grade_b_bal_res[0].get("bal_qty")
+	    vwrite(other_bal_sql)
             other_bal_res = frappe.db.sql(other_bal_sql, as_dict=1)
             if grade_b_qty < 0:
                 grade_b_qty = 0

@@ -1,1 +1,5 @@
 frappe
+reportlab
+gspread
+oauth2client
+PyOpenSSL

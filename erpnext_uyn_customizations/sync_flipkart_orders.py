@@ -34,6 +34,7 @@ def sync_flipkart_orders():
         vwrite("No orders received")
         return False
     for flipkart_order in get_flipkart_orders_array:
+	vwrite(flipkart_order)
         params = {'shipmentId':flipkart_order.get("shipmentId")}
         shipment_id_details = get_request('shipment_id_details',params)
         order_item_details = {
@@ -159,11 +160,24 @@ def create_sales_order(parsed_order, flipkart_settings, company=None):
             #     so.update({
             #         "mail_to_flipkart_buyer":1
             #     })
+            so.update({
+                "contact_mobile": parsed_order.get("customer_details").get("buyer_phone")
+            })
             if company:
                 so.update({
                     "company": company,
                     "status": "Draft"
                 })
+            item_code_for_company = get_order_items(parsed_order.get("item_details").get("all_items"), flipkart_settings,parsed_order)
+            company_override = frappe.db.get_value("Item",{"item_code": item_code_for_company[0].get("item_code")}, "company")
+            if company_override:
+                so.update({
+                    "company": company_override
+                })
+                i=0
+                for item in so.__dict__.get("items"):
+                    so.__dict__.get("items")[i].__dict__["warehouse"] = "%s%s" %(so.__dict__.get("items")[i].__dict__.get("warehouse")[:-6]," - FZI")
+                    i = i + 1
             so.flags.ignore_mandatory = True
             try:
                 so.save(ignore_permissions=True)

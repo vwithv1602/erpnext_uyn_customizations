@@ -90,10 +90,13 @@ class OperationsProductivity(object):
             warehouse_condition = """ sed.s_warehouse = 'Chip Tech - Uyn'
         and (sed.t_warehouse = 'Tech Team - Uyn' or sed.t_warehouse = 'Final QC & Packing - Uyn' or sed.t_warehouse Like 'Ready To Ship - Uyn' or sed.t_warehouse Like 'G3 Ready To Ship - Uyn' or sed.t_warehouse Like 'Ready To Ship Grade B- Uyn') """
             inspection_type = "Chip Level In Process"
+        elif warehouse=='Final QC Team':
+            warehouse_condition = """ sed.s_warehouse = 'Final QC & Packing - Uyn' and sed.t_warehouse = 'Packing - Uyn' """
+            inspection_type = "Final QC"
         # elif warehouse=='Final QC Team':
         #     warehouse_condition = """ sed.s_warehouse = 'Final QC & Packing - Uyn' """
         #     inspection_type = "Final QC"
-        if warehouse != 'Final QC Team':    
+        if True:    
             productivity_daily_sql = """ 
             select a.employee, count(a.serial_no) as count
             from

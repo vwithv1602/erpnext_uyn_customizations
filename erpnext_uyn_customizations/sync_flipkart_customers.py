@@ -54,7 +54,7 @@ def create_customer_address(parsed_order, flipkart_customer):
 			else:
 				address_line2 = 'NA'
 			if not frappe.db.get_value("Address",
-									   {"flipkart_address_id": parsed_order.get("customer_details").get("buyer_email")}, "name"):
+									   {"flipkart_address_id": parsed_order.get("customer_details").get("buyer_address_id")}, "name"):
 				frappe.get_doc({
 					"doctype": "Address",
 					"flipkart_address_id": parsed_order.get("customer_details").get("buyer_address_id"),
