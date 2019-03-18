@@ -1,0 +1,34 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2019-01-08 14:58:35.347813", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Company LetterHead", 
+ "modified": "2019-01-08 15:22:43.675681", 
+ "modified_by": "Administrator", 
+ "module": "Erpnext Uyn Customizations", 
+ "name": "Store Inward Outward Movement", 
+ "owner": "Administrator", 
+ "query": "select sed.item_code as \"Item:Link/Item:450\",sed.qty as \"Outward Qty::90\",\"\" as \"Inward Qty::80\",sed.parent as \"Stock Entry:Link/Stock Entry:80\",sed.owner as \"CreatedBy::100\",se.posting_date as \"Date::80\" from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name where sed.s_warehouse='Stores - Uyn' and se.posting_date >= CURDATE()\nunion\nselect sed.item_code as \"Item:Link/Item:450\",\"\" as \"Outward Qty::90\",sed.qty as \"Inward Qty::80\",sed.parent as \"Stock Entry:Link/Stock Entry:80\",sed.owner as \"CreatedBy::100\",se.posting_date as \"Date::80\" from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name where sed.t_warehouse='Stores - Uyn' and se.posting_date >= CURDATE()", 
+ "ref_doctype": "Stock Entry", 
+ "report_name": "Store Inward Outward Movement", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Manufacturing User"
+  }, 
+  {
+   "role": "Manufacturing Manager"
+  }, 
+  {
+   "role": "Stock Manager"
+  }
+ ]
+}

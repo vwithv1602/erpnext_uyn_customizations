@@ -60,6 +60,9 @@ frappe.ui.form.on('Spreadsheet Import', {
 		});
 	},
 	import: function(frm){
+		console.log("frm sending error")
+		console.log(frm)
+		console.log(frm.doc)
 		frappe.call({
 			method: "erpnext_uyn_customizations.client.import_data",
 			args: {

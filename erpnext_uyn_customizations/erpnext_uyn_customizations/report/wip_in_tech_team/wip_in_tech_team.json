@@ -1,0 +1,31 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2018-09-19 22:23:50.727825", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "json": "{\"add_total_row\": 0, \"sort_by\": \"Serial No.purchase_date\", \"add_totals_row\": 0, \"sort_order\": \"asc\", \"sort_by_next\": null, \"filters\": [[\"Serial No\", \"item_group\", \"=\", \"Laptops\"], [\"Serial No\", \"purchase_date\", \">\", \"2018-07-31\"], [\"Serial No\", \"warehouse\", \"=\", \"Tech Team - Uyn\"]], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Serial No\"], [\"item_code\", \"Serial No\"], [\"warehouse\", \"Serial No\"], [\"purchase_date\", \"Serial No\"]]}", 
+ "letter_head": "Company LetterHead", 
+ "modified": "2018-12-05 14:40:03.159439", 
+ "modified_by": "Administrator", 
+ "module": "Erpnext Uyn Customizations", 
+ "name": "WIP in Tech Team", 
+ "owner": "Administrator", 
+ "ref_doctype": "Serial No", 
+ "report_name": "WIP in Tech Team", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Item Manager"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }
+ ]
+}

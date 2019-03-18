@@ -1,19 +1,28 @@
-// Copyright (c) 2016, vavcoders and contributors
+// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
 
 frappe.query_reports["Productivity Insights"] = {
 	"filters": [
-
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": frappe.defaults.get_user_default("Company")
+		},
+		{
+			"fieldname":"selected_date",
+			"label": __("Select Date"),
+			"fieldtype": "Date"
+		},
 	],
-	"formatter":function (row, cell, value, columnDef, dataContext, default_formatter) {
-			value = default_formatter(row, cell, value, columnDef, dataContext);
-			if (columnDef.id == "Employee") {
-					if(jQuery.inArray(dataContext.Employee, ['Incoming Team','Tech Team','Chip Team','Final QC Team','Company Net Productivity']) !== -1){
-							value = "<span style='font-weight:bold'>" + value + "</span>";
-					}
-			}
-
-			return value;
+	onload: function(report) {
+		report.page.add_inner_button(__("Productivity Insights"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Productivity Insights', {company: filters.company});
+		});
 	}
 }
+
+
+

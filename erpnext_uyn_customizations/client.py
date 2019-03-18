@@ -9,6 +9,10 @@ import frappe.utils
 import json, os
 import ast
 from erpnext_ebay.vlog import vwrite
+
+@frappe.whitelist()
+def testping(allow_guest=True):
+    return "testing ping response"
 @frappe.whitelist()
 def get_check_list_based_on_inspection_type(doctype, fields=None, filters=None, order_by=None,limit_start=None, limit_page_length=20, parent=None,inspection_type=None):
     '''Returns a list of records by filters, fields, ordering and limit
@@ -124,13 +128,13 @@ def get_matched_item(ram=None,hdd=None,item=None):
             hdd_attr = item_attr.get("attribute")
             hdd_attr_value = item_attr.get("attribute_value")
 	    if hdd_attr_value.split(" ")[1]=='TB':
-		hdd_attr_value = int(hdd_attr_value.split(" ")[0]) * 1000
+		hdd_attr_value = float(hdd_attr_value.split(" ")[0]) * 1000
 	    else:
 		hdd_attr_value = hdd_attr_value.split(" ")[0]
             hdd_unit_value = 0
             if " TB" in hdd:
                 hdd_arr = hdd.split(" ")
-                hdd_unit_value = int(hdd_arr[0]) * 1000
+                hdd_unit_value = float(hdd_arr[0]) * 1000
             else:
                 hdd_arr = hdd.split(" ")
                 hdd_unit_value = hdd_arr[0]
@@ -219,6 +223,8 @@ def get_stock_balance(warehouses=[],items=[]):
 
 @frappe.whitelist()
 def get_spreadsheet_data(spreadsheet_id=None,sheet_name=None):
+    vwrite("in get_spreadsheet_data")
+    vwrite("%s %s" %(spreadsheet_id,sheet_name))
     import gspread
     from oauth2client.service_account import ServiceAccountCredentials
     scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
@@ -240,13 +246,19 @@ def get_spreadsheet_data(spreadsheet_id=None,sheet_name=None):
 
 @frappe.whitelist()
 def import_data(doc):
+    vwrite("inside import_data")
+    vwrite("1")
     doc = ast.literal_eval(doc)
+    vwrite("2")
     spreadsheet_id = doc.get("spreadsheet_id")
+    vwrite("3")
     sheet_name = doc.get("sheet_name")
-
+    vwrite("4")
     spreadsheet_data = get_spreadsheet_data(spreadsheet_id,sheet_name)
+    vwrite("5")
     mapper = doc.get("mapper")
     for data in spreadsheet_data:
+	vwrite(data)
         update_string = ""
         for map in mapper:
             if "field_name" in map:
@@ -265,6 +277,7 @@ def import_data(doc):
                     update_string += " `{0}`='{1}',".format(field_name,field_value)
         update_string = update_string[:-1]
         sql = "Update `tab{1}` set {0} where `{2}`='{3}'".format(update_string,target_doctype,foreign_key,primary_key_value)
+	vwrite(sql)
         qry = frappe.db.sql(sql,as_dict=1)
     return "OK"
 
@@ -281,3 +294,41 @@ def get_initial_condition(barcode):
             initial_condition += "<b>{0}</b>: {1} <br>".format(k,v)
     initial_condition = initial_condition.replace('_',' ').upper()
     return initial_condition
+
+@frappe.whitelist()
+def filter_gst_non_gst_in_po(doc,supplier_quotation,po_for,is_gst):
+    sql = """ select name,is_gst from `tabSupplier Quotation Item` where parent='{0}' """.format(supplier_quotation)
+    items = []
+    for item in frappe.db.sql(sql,as_dict=1):
+        vwrite("%s - %s" %(int(is_gst),int(item.get("is_gst"))))
+        if int(item.get("is_gst"))==int(is_gst):
+            items.append(item.get("name"))
+    return items
+
+@frappe.whitelist()
+def purchase_order_for_supplier_quotation(supplier_quotation):
+    sql = """ select po.name,po.gst,po.docstatus from `tabPurchase Order` po inner join `tabPurchase Order Item` poi on poi.parent=po.name where poi.supplier_quotation='%s' """ % supplier_quotation
+    return frappe.db.sql(sql,as_dict=1)
+
+@frappe.whitelist()
+def get_place_of_supply_for_si(so):
+    place_of_supply_sql = """ select state from tabAddress where name=(select customer_address from `tabSales Order` where name='%s') """ %(so)
+    place_of_supply_res = frappe.db.sql(place_of_supply_sql,as_dict=1)
+    return place_of_supply_res[0].get("state")
+
+@frappe.whitelist()
+def can_save_mreq(logged_in_user,against_serial_no=None):
+    vwrite("in can_save_mreq by: %s"%logged_in_user)
+    # This function accepts logged_in_user,against_serial_no and will return true or false based on the below condition.
+    # Irrespective of mreq status (closed/pending/ordered), if a material request is present against a serial no. block further requests.
+    # Allow only authorized persons (having role - Material Request Manager) to raise material request
+    if ('Material Request Manager' in frappe.get_roles(logged_in_user)):
+        return {"access":""}
+    mr_for_item_against_sno_sql = """ select mr.status,mri.name,mri.parent from `tabMaterial Request Item` mri inner join `tabMaterial Request` mr on mr.name=mri.parent where mri.serial_no='{0}' and mri.docstatus=1 and mr.status in ('Ordered','Partially Ordered','Stopped') """.format(against_serial_no)
+    vwrite(mr_for_item_against_sno_sql)
+    mr_for_item_against_sno_res = frappe.db.sql(mr_for_item_against_sno_sql,as_dict=1)
+    if len(mr_for_item_against_sno_res):
+        prev_mr = mr_for_item_against_sno_res[0].get("parent")
+        msg = "You have already raised %s. So you can't raise another MR. Please contact your manager" % prev_mr
+        return {"access":msg}
+    return {"access":""}

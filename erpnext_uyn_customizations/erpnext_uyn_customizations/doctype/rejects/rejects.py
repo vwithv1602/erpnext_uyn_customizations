@@ -43,7 +43,9 @@ def get_last_qc(serial_no,inspection_type):
 	inspection_sql = """ select name,inspected_by,report_date,inspection_type from `tabQuality Inspection` where inspection_type = '{0}' and barcode='{1}' order by report_date desc """.format(inspection_type,serial_no)
 	inspection_res = frappe.db.sql(inspection_sql,as_dict=1)
 	return inspection_res[0] if len(inspection_res)>0 else None
-
+@frappe.whitelist()
+def test():
+	print get_last_qc('R9WAN16','In Process')
 def get_inspection_type(t_warehouse):
 	warehouses_sql = """ select warehouse_name,warehouse_sequence_number,warehouse_inspection_type from `tabWarehouse` where warehouse_name = '{0}' """.format(t_warehouse[:-6])
 	warehouses_res = frappe.db.sql(warehouses_sql,as_dict=1)
@@ -69,6 +71,6 @@ def log_reject(reject,method):
 					"from_warehouse": itm.get("s_warehouse"),
 					"to_warehouse": itm.get("t_warehouse"),
 					"ste_name": reject.__dict__.get("name"),
-					"qc_name": last_qc.get("name"),
+					"qi_name": last_qc.get("name"),
 				}
 				save_reject(obj)

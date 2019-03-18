@@ -176,7 +176,11 @@ def create_sales_order(parsed_order, flipkart_settings, company=None):
                 })
                 i=0
                 for item in so.__dict__.get("items"):
-                    so.__dict__.get("items")[i].__dict__["warehouse"] = "%s%s" %(so.__dict__.get("items")[i].__dict__.get("warehouse")[:-6]," - FZI")
+                    if company_override=='Fizzics India':
+                        suffix = " - FZI"
+                    elif company_override=='Usedyetnew':
+                        suffix = " - Uyn"
+                    so.__dict__.get("items")[i].__dict__["warehouse"] = "%s%s" %(so.__dict__.get("items")[i].__dict__.get("warehouse")[:-6],suffix)
                     i = i + 1
             so.flags.ignore_mandatory = True
             try:
