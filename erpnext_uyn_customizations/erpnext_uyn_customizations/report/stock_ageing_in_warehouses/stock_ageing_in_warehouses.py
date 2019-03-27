@@ -16,7 +16,7 @@ def get_columns():
 		_("Purchase Receipt Date") + ":Data:120",
 		_("Total Age in ERP") + ":Data:120",
 		_("Current Warehouse") + ":Data:120",
-		_("Material Receipt Date") + ":Data:120",
+		_("Last Transfer Date") + ":Data:120",
 		_("Warehouse Ageing") + ":Data:120"
 	]
 	return columns
