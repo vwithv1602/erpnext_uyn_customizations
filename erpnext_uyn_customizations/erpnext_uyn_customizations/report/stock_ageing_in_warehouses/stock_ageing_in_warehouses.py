@@ -14,10 +14,10 @@ def get_columns():
 		_("Serial No") + ":Link/Serial No:120",
 		_("Item Code") + ":Data:120",
 		_("Purchase Receipt Date") + ":Data:120",
-		_("Total Age in ERP") + ":Data:120",
+		_("Total Age in ERP") + ":Float:120",
 		_("Current Warehouse") + ":Data:120",
 		_("Last Transfer Date") + ":Data:120",
-		_("Warehouse Ageing") + ":Data:120"
+		_("Warehouse Ageing") + ":Float:120"
 	]
 	return columns
 
