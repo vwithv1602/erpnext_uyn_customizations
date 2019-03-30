@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from sets import Set
+from operator import itemgetter
 from erpnext_ebay.vlog import vwrite
 
 def get_columns():
@@ -67,9 +68,9 @@ def get_data():
 		
 		total_age_in_erp = stock_purchase_details.get(serial_no, None)
 		if total_age_in_erp:
-			total_age_in_erp = total_age_in_erp[2]
+			total_age_in_erp = int(total_age_in_erp[2])
 		else:
-			total_age_in_erp = "Unknown"
+			total_age_in_erp = 0
 		
 		current_warehouse = stock_current_warehouse_details.get(serial_no,None)
 		if current_warehouse:
@@ -85,12 +86,15 @@ def get_data():
 		
 		current_warehouse_ageing = stock_current_warehouse_details.get(serial_no, None)
 		if current_warehouse_ageing:
-			current_warehouse_ageing = current_warehouse_ageing[2]
+			current_warehouse_ageing = int(current_warehouse_ageing[2])
 		else:
-			current_warehouse_ageing = "Unknown"
+			current_warehouse_ageing = 0
+		
+		if total_age_in_erp < 90:
+			continue
 		
 		data.append([serial_no, item_code, purchase_receipt_date, total_age_in_erp, current_warehouse, material_receipt_date, current_warehouse_ageing])
-
+	data = sorted(data, key=itemgetter(3))
 	return data
 
 		
