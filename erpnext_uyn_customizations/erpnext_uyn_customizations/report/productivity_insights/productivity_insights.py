@@ -72,6 +72,15 @@ class ProductivityInsights(object):
         warehouse_sequence_sql = """ select warehouse_name,warehouse_sequence_number,warehouse_inspection_type from `tabWarehouse` where warehouse_sequence_number<>'' """
         warehouse_sequence_res = frappe.db.sql(warehouse_sequence_sql,as_dict=1)
         for warehouse in warehouse_sequence_res:
+            total_gross_day = 0
+            total_net_day = 0
+            total_daily_rejects = 0
+            total_gross_week = 0
+            total_net_week = 0
+            total_weekly_reject = 0
+            total_gross_month = 0
+            total_net_month = 0
+            total_monthly_rejects = 0
             employees = {}
             active_employees = []
             for employee in employees_res:
@@ -150,6 +159,19 @@ class ProductivityInsights(object):
                 weekly_rejects = self.get_rejects(employee,'weekly',warehouse.get("warehouse_inspection_type"))
                 monthly_rejects = self.get_rejects(employee,'monthly',warehouse.get("warehouse_inspection_type"))
                 data.append([employee,productivity.get("gross_day"),productivity.get("net_day"),daily_rejects,productivity.get("gross_week"),productivity.get("net_week"),weekly_rejects,productivity.get("gross_month"),"<b>"+str(productivity.get("net_month"))+"</b>",monthly_rejects])
+                #Total for day
+                total_gross_day += int(productivity.get('gross_day') or 0)
+                total_net_day += int(productivity.get('net_day') or 0)
+                total_daily_rejects += int(daily_rejects or 0)
+                # Total for week
+                total_gross_week += int(productivity.get("gross_week") or 0)
+                total_net_week += int(productivity.get("net_week") or 0)
+                total_weekly_reject += int(weekly_rejects or 0)
+                # Total for month
+                total_gross_month += int(productivity.get("gross_month") or 0)
+                total_net_month += int(productivity.get("net_month") or 0)
+                total_gross_month += int(monthly_rejects or 0)
+            data.append(["<b>Total</b>",total_gross_day, total_net_day, total_daily_rejects, total_gross_week, total_net_week, total_weekly_reject, total_gross_month, total_net_month, total_monthly_rejects])        
         data.append(["<b>PAINTING PRODUCTIVITY</b>","","",""])
         painting_productivity = self.get_painting_productivity()
         data.append(painting_productivity)
@@ -159,7 +181,6 @@ class ProductivityInsights(object):
         data.append(["<b>COMPANY NET PRODUCTIVITY</b>","","",""])
         company_net_productivity = self.get_company_net_productivity()
         data.append(company_net_productivity)
-        
 
         return data
 
