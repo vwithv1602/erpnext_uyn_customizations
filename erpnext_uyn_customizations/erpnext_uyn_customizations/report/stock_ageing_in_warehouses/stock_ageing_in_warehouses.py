@@ -94,10 +94,30 @@ def get_data():
 			continue
 		
 		data.append([serial_no, item_code, purchase_receipt_date, total_age_in_erp, current_warehouse, material_receipt_date, current_warehouse_ageing])
+	update_serial_no_purchase_details(stock_purchase_details)
+	update_serial_no_warehouse_age(stock_current_warehouse_details)
 	data = sorted(data, key=itemgetter(3), reverse=True)
 	return data
 
-		
+def update_serial_no_purchase_details(stock_purchase_details):
+	
+	serial_no_list = stock_purchase_details.keys()
+
+	for serial_no in serial_no_list:
+		query = """update `tabSerial No` set total_age={0} where name='{1}'""".format(int(stock_purchase_details[serial_no][2]), str(serial_no))
+		frappe.db.sql(query)
+		frappe.db.commit()
+
+
+def update_serial_no_warehouse_age(stock_current_warehouse_details):
+
+	serial_no_list = stock_current_warehouse_details.keys()
+
+	for serial_no in serial_no_list:
+		query = """update `tabSerial No` set age_in_warehouse={0} where name='{1}'""".format(int(stock_current_warehouse_details[serial_no][2]), str(serial_no))
+		frappe.db.sql(query)
+		frappe.db.commit()
+
 
 
 def execute(filters=None):
