@@ -87,6 +87,7 @@ class ProductivityInsights(object):
                 employees[employee.get('user_id')] = {}
                 active_employees.append(employee.get('user_id'))
             data.append(["<b>"+warehouse.get("warehouse_name")+"</b>"])
+            location = len(data) - 1
 
             # Gross Daily
             gross_day_sql = """ select A.owner,count(A.item_serial_no) as count,A.creation,A.name
@@ -171,7 +172,7 @@ class ProductivityInsights(object):
                 total_gross_month += int(productivity.get("gross_month") or 0)
                 total_net_month += int(productivity.get("net_month") or 0)
                 total_gross_month += int(monthly_rejects or 0)
-            data.append(["<b>Total</b>",total_gross_day, total_net_day, total_daily_rejects, total_gross_week, total_net_week, total_weekly_reject, total_gross_month, total_net_month, total_monthly_rejects])        
+            data[location].extend([total_gross_day, total_net_day, total_daily_rejects, total_gross_week, total_net_week, total_weekly_reject, total_gross_month, total_net_month, total_monthly_rejects])        
         data.append(["<b>PAINTING PRODUCTIVITY</b>","","",""])
         painting_productivity = self.get_painting_productivity()
         data.append(painting_productivity)
