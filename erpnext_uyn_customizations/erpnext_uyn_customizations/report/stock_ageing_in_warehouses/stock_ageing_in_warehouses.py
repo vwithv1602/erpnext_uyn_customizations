@@ -28,7 +28,7 @@ def get_stock_purchase_receipt_details():
 
 	for stock_entry in frappe.db.sql(stock_purchase_receipt_details_query):
 		stock_purchase_details[stock_entry[0]] = [stock_entry[1],stock_entry[2],stock_entry[3]]
-	vwrite(stock_purchase_details)
+	#vwrite(stock_purchase_details)
 	return stock_purchase_details
 
 def get_stock_current_warehouse_details():
