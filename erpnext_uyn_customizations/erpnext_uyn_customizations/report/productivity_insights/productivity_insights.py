@@ -11,6 +11,7 @@
 ###
 
 from __future__ import unicode_literals
+import datetime
 import frappe
 from frappe import msgprint, _
 from datetime import datetime,timedelta
@@ -47,10 +48,11 @@ class ProductivityInsights(object):
     
     def get_columns(self):
         """return columns bab on filters"""
+        today_date = "Gross Day ({})".format(datetime.date.today().isoformat())
         columns = [
             # _("Warehouse") + ":Link/Purchase Order:90",
             _("Warehouse<br>Employee") + ":Data:180",
-            _("Gross Day") + ":Data:90",
+            _(today_date) + ":Data:90",
             _("Net Day") + ":Data:90",
             _("Day Rejects") + ":Data:90",
             _("Gross Week") + ":Data:90",
@@ -171,7 +173,18 @@ class ProductivityInsights(object):
                 # Total for month
                 total_gross_month += int(productivity.get("gross_month") or 0)
                 total_net_month += int(productivity.get("net_month") or 0)
-                total_gross_month += int(monthly_rejects or 0)
+                total_monthly_rejects += int(monthly_rejects or 0)
+            
+            ## Final check before adding to the data.
+            total_gross_day = self.get_count_or_empty(total_gross_day)
+            total_net_day = self.get_count_or_empty(total_net_day)
+            total_daily_rejects = self.get_count_or_empty(total_daily_rejects)
+            total_gross_week = self.get_count_or_empty(total_gross_week)
+            total_net_week = self.get_count_or_empty(total_net_week)
+            total_weekly_reject = self.get_count_or_empty(total_weekly_reject)
+            total_gross_month = self.get_count_or_empty(total_gross_month)
+            total_net_month = self.get_count_or_empty(total_net_month)
+            total_monthly_rejects = self.get_count_or_empty(total_monthly_rejects)
             data[location].extend([total_gross_day, total_net_day, total_daily_rejects, total_gross_week, total_net_week, total_weekly_reject, total_gross_month, total_net_month, total_monthly_rejects])        
         data.append(["<b>PAINTING PRODUCTIVITY</b>","","",""])
         painting_productivity = self.get_painting_productivity()
@@ -184,6 +197,11 @@ class ProductivityInsights(object):
         data.append(company_net_productivity)
 
         return data
+    def get_count_or_empty(self, total):
+        if total == 0:
+            return ""
+        else:
+            return total
 
     def get_rejects(self,emp,period,inspection_type):
         rejects = 0
