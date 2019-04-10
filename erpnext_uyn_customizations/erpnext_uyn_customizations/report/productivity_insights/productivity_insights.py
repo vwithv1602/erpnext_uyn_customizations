@@ -11,10 +11,9 @@
 ###
 
 from __future__ import unicode_literals
-import datetime
 import frappe
 from frappe import msgprint, _
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,date
 from erpnext_ebay.vlog import vwrite
 
 class ProductivityInsights(object):
@@ -48,7 +47,7 @@ class ProductivityInsights(object):
     
     def get_columns(self):
         """return columns bab on filters"""
-        today_date = "Gross Day ({})".format(datetime.date.today().isoformat())
+        today_date = "Gross Day ({})".format(date.today().isoformat())
         columns = [
             # _("Warehouse") + ":Link/Purchase Order:90",
             _("Warehouse<br>Employee") + ":Data:180",
