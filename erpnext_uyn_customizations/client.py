@@ -332,3 +332,20 @@ def can_save_mreq(logged_in_user,against_serial_no=None):
         msg = "You have already raised %s. So you can't raise another MR. Please contact your manager" % prev_mr
         return {"access":msg}
     return {"access":""}
+
+def get_tech_repack_pending_doc(serial_no):
+    return frappe.get_list("Tech Repack", filters={'status': 'Pending', 'barcode': serial_no},fields=['name','owner'])
+
+@frappe.whitelist()
+def check_pending_tech_repack(serial_nos):
+
+    serial_no_list = serial_nos.strip().split('\n')
+    result = []
+    for serial_no in serial_no_list:
+        tech_repack_pending_doc_list = get_tech_repack_pending_doc(serial_no)
+        if not tech_repack_pending_doc_list:
+            continue
+        else:
+            result.extend(tech_repack_pending_doc_list)
+    
+    return result
