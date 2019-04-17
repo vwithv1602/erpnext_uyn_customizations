@@ -334,7 +334,7 @@ def can_save_mreq(logged_in_user,against_serial_no=None):
     return {"access":""}
 
 def get_tech_repack_pending_doc(serial_no):
-    return frappe.get_list("Tech Repack", filters={'status': 'Pending', 'barcode': serial_no},fields=['name','owner'])
+    return frappe.get_list("Tech Repack", filters={'docstatus': 1,'status': 'Pending', 'barcode': serial_no},fields=['name','owner'])
 
 @frappe.whitelist()
 def check_pending_tech_repack(serial_nos):
