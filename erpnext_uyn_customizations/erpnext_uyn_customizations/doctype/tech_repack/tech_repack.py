@@ -127,7 +127,7 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		#target.basic_rate=get_basic_rate(source.item_code,'source')
 		args = frappe._dict({"item_code":source.item_code,"qty":-source.qty,"allow_zero_valuation":1,"warehouse":source.source_warehouse,"voucher_type":"Stock Entry","cost_center":"Main - Uyn","posting_date":str(datetime.now().isoformat())[:10],"posting_time":str(datetime.now().isoformat())[11:]})
 		from erpnext.stock.utils import get_incoming_rate
-		target.basic_rate = get_incoming_rate(args)
+		target.basic_rate = get_incoming_rate(args) or 0
 		global total_source_rate
 		total_source_rate = total_source_rate + target.basic_rate
 	def update_given_item(source, target, source_parent):
