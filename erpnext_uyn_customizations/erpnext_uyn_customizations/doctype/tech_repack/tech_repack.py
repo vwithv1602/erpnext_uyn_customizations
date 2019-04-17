@@ -163,7 +163,7 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		else:
 			price_details = frappe.db.sql(" select valuation_rate from `tabItem` where item_code='%s' order by creation desc" % item_code,as_dict=1)
 			if len(price_details):
-				rate = price_details[0].get("valuation_rate")
+				rate = price_details[0].get("valuation_rate", 0)
 			else:
 				rate = 0
 		if dest_type=='source':
