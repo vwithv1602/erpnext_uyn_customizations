@@ -129,7 +129,7 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		from erpnext.stock.utils import get_incoming_rate
 		target.basic_rate = get_incoming_rate(args) or 0
 		global total_source_rate
-		total_source_rate = total_source_rate + target.basic_rate
+		total_source_rate = (total_source_rate or 0) + target.basic_rate
 	def update_given_item(source, target, source_parent):
 		vwrite("In update_given_item")
 		# target.amount = flt(source.amount) - flt(source.billed_amt)
