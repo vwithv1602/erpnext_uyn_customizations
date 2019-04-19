@@ -339,7 +339,7 @@ def get_tech_repack_pending_doc(serial_no):
 @frappe.whitelist()
 def check_pending_tech_repack(serial_nos):
 
-    serial_no_list = serial_nos.strip().split('\n')
+    serial_no_list = serial_nos.strip().split(',')
     result = []
     for serial_no in serial_no_list:
         tech_repack_pending_doc_list = get_tech_repack_pending_doc(serial_no)
