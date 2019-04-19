@@ -150,7 +150,8 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		from erpnext.stock.utils import get_incoming_rate
 		target.basic_rate = get_incoming_rate(args)
 		global total_target_rate
-		total_target_rate = total_target_rate + target.basic_rate
+		total_target_rate = total_target_rate + (target.basic_rate or 0)
+	
 	def get_basic_rate(item_code,dest_type):
 		vwrite("item_code: %s, dest_type: %s" %(item_code,dest_type))
 		global total_source_rate
