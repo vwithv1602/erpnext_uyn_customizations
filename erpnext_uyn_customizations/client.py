@@ -8,6 +8,7 @@ import frappe.model
 import frappe.utils
 import json, os
 import ast
+#from parse_erpnext_connector import parse_quality_inspection_report
 from erpnext_ebay.vlog import vwrite
 
 @frappe.whitelist()
@@ -348,4 +349,18 @@ def check_pending_tech_repack(serial_nos):
         else:
             result.extend(tech_repack_pending_doc_list)
     
+    return result
+
+@frappe.whitelist()
+def get_future_stock_entry(serial_nos, posting_date, posting_time):
+    
+    result = {}
+    future_sle_query = """select name from `tabStock Ledger Entry` where serial_no like '%%{}%%' and posting_date >= '{}' and posting_time > '{}'"""
+    for serial_no in serial_nos:
+        current_serial_no_query = future_sle_query.format(serial_no, posting_date, posting_time)
+        stock_ledger_entry_list = frappe.db.sql(current_serial_no_query, as_list=1)
+        if len(stock_ledger_entry_list) > 0:
+            result['status'] = False
+            return result
+    result['status'] = True
     return result
