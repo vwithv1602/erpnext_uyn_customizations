@@ -325,6 +325,8 @@ def can_save_mreq(logged_in_user,against_serial_no=None):
     # Allow only authorized persons (having role - Material Request Manager) to raise material request
     if ('Material Request Manager' in frappe.get_roles(logged_in_user)):
         return {"access":""}
+    if serial_no == '':
+        return {"access":""}
     mr_for_item_against_sno_sql = """ select mr.status,mri.name,mri.parent from `tabMaterial Request Item` mri inner join `tabMaterial Request` mr on mr.name=mri.parent where mri.serial_no='{0}' and mri.docstatus=1 and mr.status in ('Ordered','Partially Ordered','Stopped') """.format(against_serial_no)
     vwrite(mr_for_item_against_sno_sql)
     mr_for_item_against_sno_res = frappe.db.sql(mr_for_item_against_sno_sql,as_dict=1)
