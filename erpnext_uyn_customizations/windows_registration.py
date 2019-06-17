@@ -9,9 +9,9 @@ import re
 import ast
 from erpnext_ebay.vlog import vwrite
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def registration(info):
-    
+    vwrite(info)
     if not validate(info):
         return {
                 'status':False
@@ -57,3 +57,7 @@ def validate_phone_number(phone):
 def validate_email_id(email_id):
     validator = re.compile("[^@]+@[^@]+\.[^@]+")
     return bool(validator.match(email_id))
+
+@frappe.whitelist(allow_guest=True)
+def register():
+    vwrite("Hello")
