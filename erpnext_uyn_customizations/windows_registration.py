@@ -251,7 +251,7 @@ class FrappeClient(object):
 def registration():
     info={'order_id':'402-3919962-8235519','phone':'9851281756','email_id':'xyabcz@gmail.com'}
     vwrite(info)
-    client = FrappeClient("http://35.154.240.105","Administrator","inaya")
+    client = FrappeClient("http://35.154.240.105","it@usedyetnew.com","thisisit1#")
     if not validate(info):
         return {
                 'status':False
