@@ -57,7 +57,3 @@ def validate_phone_number(phone):
 def validate_email_id(email_id):
     validator = re.compile("[^@]+@[^@]+\.[^@]+")
     return bool(validator.match(email_id))
-
-@frappe.whitelist(allow_guest=True)
-def register():
-    vwrite("Hello")
