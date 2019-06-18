@@ -249,36 +249,35 @@ class FrappeClient(object):
 
 @frappe.whitelist(allow_guest=True)
 def registration(info):
-    #={'order_id':'408-4601262-0114724','phone':'9851281756','email_id':'xyabcz@gmail.com'}
     vwrite(info)
-    # if not validate(info):
-    #     return {
-    #             'status':False
-    #         }
+    if not validate(info):
+        return {
+                'status':False
+            }
     
-    # amazon_sales_order_id = frappe.db.get_value("Sales Order", {'amazon_order_id':info["order_id"]}, 'name')
-    # vwrite(amazon_sales_order_id)
-    # flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name')
+    amazon_sales_order_id = frappe.db.get_value("Sales Order", {'amazon_order_id':info["order_id"]}, 'name')
+    vwrite(amazon_sales_order_id)
+    flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name')
 
-    # if not amazon_sales_order_id or flipkart_sales_order_id:
-    #     return {
-    #         'status': False,
-    #         'error': "Sales Order Not Found."
-    #     }
-    # sales_order_doc = frappe.get_doc("Sales Order", amazon_sales_order_id or flipkart_sales_order_id)
-    # customer_address_doc_name = sales_order_doc.customer_address
-    # vwrite(customer_address_doc_name)
-    # if not customer_address_doc_name:
-    #     return {
-    #         'status':False,
-    #         'error': "Address not found"
-    #     }
-    # client = FrappeClient("http://35.154.240.105","it@usedyetnew.com","thisisit1#")
-    # vwrite(client)
-    # customer_address_doc = client.get_doc("Address", customer_address_doc_name)
-    # customer_address_doc["email_id"] = info['email_id']
-    # customer_address_doc["phone"] = info['phone']
-    # client.update(customer_address_doc)
+    if not amazon_sales_order_id or flipkart_sales_order_id:
+        return {
+            'status': False,
+            'error': "Sales Order Not Found."
+        }
+    sales_order_doc = frappe.get_doc("Sales Order", amazon_sales_order_id or flipkart_sales_order_id)
+    customer_address_doc_name = sales_order_doc.customer_address
+    vwrite(customer_address_doc_name)
+    if not customer_address_doc_name:
+        return {
+            'status':False,
+            'error': "Address not found"
+        }
+    client = FrappeClient("http://35.154.240.105","it@usedyetnew.com","thisisit1#")
+    vwrite(client)
+    customer_address_doc = client.get_doc("Address", customer_address_doc_name)
+    customer_address_doc["email_id"] = info['email_id']
+    customer_address_doc["phone"] = info['phone']
+    client.update(customer_address_doc)
     
 def validate(info):
     key_to_function_map = {
