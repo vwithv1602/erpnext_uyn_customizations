@@ -248,7 +248,7 @@ class FrappeClient(object):
 				return None
 
 @frappe.whitelist(allow_guest=True)
-def registration(info,ignore_permissions=True):
+def registration(info):
     info = ast.literal_eval(info)
     if not validate(info):
         return {
