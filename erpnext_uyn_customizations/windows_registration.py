@@ -272,6 +272,7 @@ def registration(info):
             'status':False,
             'error': "Address not found"
         }
+    frappe.session.user = "it"
     client = FrappeClient("http://35.154.240.105","it@usedyetnew.com","thisisit1#")
     vwrite(client)
     customer_address_doc = client.get_doc("Address", customer_address_doc_name)
