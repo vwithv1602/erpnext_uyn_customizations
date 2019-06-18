@@ -278,6 +278,7 @@ def registration(info,ignore_permissions=True):
     customer_address_doc = frappe.get_doc("Address", customer_address_doc_name)
     customer_address_doc.email_id = info['email_id']
     customer_address_doc.phone = info['phone']
+    frappe.session.user = "it"
     customer_address_doc.save(ignore_permissions=True)
     vwrite(customer_address_doc)
     
