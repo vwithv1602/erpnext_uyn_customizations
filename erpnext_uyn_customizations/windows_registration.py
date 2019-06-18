@@ -25,7 +25,6 @@ def registration(info):
             'status': False,
             'error': "Sales Order Not Found."
         }
-    vwrite(info['serial_no'])
     sales_order_doc = frappe.get_doc("Sales Order", amazon_sales_order_id or flipkart_sales_order_id)
     customer_address_doc_name = sales_order_doc.customer_address
     vwrite(customer_address_doc_name)
@@ -37,7 +36,7 @@ def registration(info):
     return {
         "status": True,
         "customer_address_doc":customer_address_doc_name,
-        "item_codes": item_code_list
+        "serial No": info["serial_no"]
     }
    
 def validate(info):
