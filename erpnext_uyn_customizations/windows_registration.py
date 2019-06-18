@@ -273,9 +273,11 @@ def registration(info):
             'error': "Address not found"
         }
     #frappe.session.user = "it"
+    customer_address_doc = client.get_doc("Address", customer_address_doc_name)
+    
+def update_address(customer_address_doc,info):
     client = FrappeClient("http://localhost","it@usedyetnew.com","thisisit1#")
     vwrite(client)
-    customer_address_doc = client.get_doc("Address", customer_address_doc_name)
     customer_address_doc["email_id"] = info['email_id']
     customer_address_doc["phone"] = info['phone']
     client.update(customer_address_doc)
