@@ -274,6 +274,7 @@ def registration(info):
         }
     #frappe.session.user = "it"
     customer_address_doc = client.get_doc("Address", customer_address_doc_name)
+    update_address(customer_address_doc,info)
     
 def update_address(customer_address_doc,info):
     client = FrappeClient("http://localhost","it@usedyetnew.com","thisisit1#")
