@@ -19,14 +19,13 @@ def registration(info):
     
     amazon_sales_order_id = frappe.db.get_value("Sales Order", {'amazon_order_id':info["order_id"]}, 'name')
     vwrite(amazon_sales_order_id)
-    flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name')
-    item_selection_query = """SELECT item_code from `tabSales Order Item` where parent='{0}'""".format(amazon_sales_order_id or flipkart_sales_order_id)
-    item_code_list = frappe.db.sql(item_selection_query,as_list=1)
+    flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name') 
     if not amazon_sales_order_id or flipkart_sales_order_id:
         return {
             'status': False,
             'error': "Sales Order Not Found."
         }
+    vwrite(info['serial_no'])
     sales_order_doc = frappe.get_doc("Sales Order", amazon_sales_order_id or flipkart_sales_order_id)
     customer_address_doc_name = sales_order_doc.customer_address
     vwrite(customer_address_doc_name)
