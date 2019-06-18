@@ -249,7 +249,7 @@ class FrappeClient(object):
 
 @frappe.whitelist(allow_guest=True)
 def registration(info):
-    vwrite(info)
+    info = ast.literal_eval(info)
     if not validate(info):
         return {
                 'status':False
