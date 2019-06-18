@@ -248,7 +248,7 @@ class FrappeClient(object):
 				return None
 
 @frappe.whitelist(allow_guest=True)
-def registration(info):
+def registration(info,ignore_permissions=True):
     info = ast.literal_eval(info)
     if not validate(info):
         return {
@@ -279,7 +279,7 @@ def registration(info):
     customer_address_doc.email_id = info['email_id']
     customer_address_doc.phone = info['phone']
     customer_address_doc.save(ignore_permissions=True)
-    vwrite(customer_address_doc.email_id)
+    vwrite(customer_address_doc)
     
 def validate(info):
     key_to_function_map = {
