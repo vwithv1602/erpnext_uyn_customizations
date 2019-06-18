@@ -279,7 +279,7 @@ def registration(info):
     customer_address_doc.email_id = info['email_id']
     customer_address_doc.phone = info['phone']
     customer_address_doc.save(ignore_permissions=True)
-    customer_address_doc.submit(ignore_permissions=True)
+    customer_address_doc.submit()
     vwrite(customer_address_doc.email_id)
     
 def validate(info):
