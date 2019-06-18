@@ -20,7 +20,8 @@ def registration(info):
     amazon_sales_order_id = frappe.db.get_value("Sales Order", {'amazon_order_id':info["order_id"]}, 'name')
     vwrite(amazon_sales_order_id)
     flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name')
-
+    item_selection_query = """SELECT item_code from `tabSales Order Item` where parent""".format(amazon_sales_order_id or flipkart_sales_order_id)
+    item_code_list = frappe.db.sql(item_selection_query,as_list=1)
     if not amazon_sales_order_id or flipkart_sales_order_id:
         return {
             'status': False,
@@ -36,7 +37,8 @@ def registration(info):
         }
     return {
         "status": True,
-        "customer_address_doc":customer_address_doc_name
+        "customer_address_doc":customer_address_doc_name,
+        "item_codes": item_code_list
     }
    
 def validate(info):
