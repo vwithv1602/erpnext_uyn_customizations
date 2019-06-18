@@ -275,12 +275,13 @@ def registration(info,ignore_permissions=True):
     #frappe.session.user = "it"
     #client = FrappeClient("http://35.154.240.105","it@usedyetnew.com","thisisit1#")
     #vwrite(client)
-    customer_address_doc = frappe.get_doc("Address", customer_address_doc_name)
-    customer_address_doc.email_id = info['email_id']
-    customer_address_doc.phone = info['phone']
-    frappe.session.user = "it"
-    customer_address_doc.save(ignore_permissions=True)
-    vwrite(customer_address_doc)
+    # customer_address_doc = frappe.get_doc("Address", customer_address_doc_name)
+    # customer_address_doc.email_id = info['email_id']
+    # customer_address_doc.phone = info['phone']
+    # customer_address_doc.save(ignore_permissions=True)
+    # vwrite(customer_address_doc)
+    update_query = """update `tabAddress` set email_id='{0}',phone='{1}' where name='{2}'""".format(info['email_id'],info['phone'],customer_address_doc_name)
+    frappe.db.sql(update_query)
     
 def validate(info):
     key_to_function_map = {
