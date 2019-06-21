@@ -392,7 +392,6 @@ class ProductivityInsights(object):
 
 @frappe.whitelist(allow_guest=True)
 def execute(filters=None):
-    filters = {'company': 'Usedyetnew', 'selected_date': '2019-04-14'}
     args = {
 
     }
