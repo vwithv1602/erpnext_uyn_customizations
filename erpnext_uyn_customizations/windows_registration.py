@@ -16,7 +16,9 @@ def registration(info):
         return {
                 'status':False
             }
-    
+    item_code_of_registering_serial_no = frappe.db.get_value("Serial No",{'name': info['serial_no']},'item_code')
+    flipkart_product_id = frappe.db.get_value("Item", {'name':item_code_of_registering_serial_no},'flipkart_product_id')
+    amazon_product_id = frappe.db.get_value("Item", {'name':item_code_of_registering_serial_no},'amazon_product_id')
     amazon_sales_order_id = frappe.db.get_value("Sales Order", {'amazon_order_id':info["order_id"]}, 'name')
     vwrite(amazon_sales_order_id)
     flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name') 
@@ -36,7 +38,8 @@ def registration(info):
     return {
         "status": True,
         "customer_address_doc":customer_address_doc_name,
-        "serial No": info["serial_no"]
+        "amazon_product_id": amazon_product_id,
+        "flipkart_product_id": flipkart_product_id
     }
    
 def validate(info):
