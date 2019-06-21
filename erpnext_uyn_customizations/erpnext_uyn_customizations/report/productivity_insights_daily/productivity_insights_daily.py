@@ -387,7 +387,7 @@ class ProductivityInsights(object):
 		gross_returns_monthly = frappe.db.sql(gross_returns_month_sql,as_dict=1)[0].get("monthly")
 		net_returns_monthly = frappe.db.sql(net_returns_month_sql,as_dict=1)[0].get("monthly")
 		rejected_returns_monthly = frappe.db.sql(rejected_returns_month_sql,as_dict=1)[0].get("monthly")
-		return ["Pankaj",gross_returns,net_returns,rejected_returns,gross_returns_weekly,net_returns_weekly,rejected_returns_weekly,gross_returns_monthly,net_returns_monthly,rejected_returns_monthly]
+		return ["Customer Support",gross_returns,net_returns,rejected_returns,gross_returns_weekly,net_returns_weekly,rejected_returns_weekly,gross_returns_monthly,net_returns_monthly,rejected_returns_monthly]
 
 @frappe.whitelist(allow_guest=True)
 def execute(filters=None):

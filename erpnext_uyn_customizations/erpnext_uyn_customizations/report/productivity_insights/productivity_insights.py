@@ -18,6 +18,7 @@ from erpnext_ebay.vlog import vwrite
 
 class ProductivityInsights(object):
     def __init__(self, filters=None):
+        vwrite(filters)
         self.filters = frappe._dict(filters or {})
         if not filters.get("selected_date"):
             self.selected_date_obj = datetime.strptime(datetime.today().strftime('%Y-%m-%d'), '%Y-%m-%d')
@@ -387,10 +388,11 @@ class ProductivityInsights(object):
 		gross_returns_monthly = frappe.db.sql(gross_returns_month_sql,as_dict=1)[0].get("monthly")
 		net_returns_monthly = frappe.db.sql(net_returns_month_sql,as_dict=1)[0].get("monthly")
 		rejected_returns_monthly = frappe.db.sql(rejected_returns_month_sql,as_dict=1)[0].get("monthly")
-		return ["Pankaj",gross_returns,net_returns,rejected_returns,gross_returns_weekly,net_returns_weekly,rejected_returns_weekly,gross_returns_monthly,net_returns_monthly,rejected_returns_monthly]
+		return ["Customer Support",gross_returns,net_returns,rejected_returns,gross_returns_weekly,net_returns_weekly,rejected_returns_weekly,gross_returns_monthly,net_returns_monthly,rejected_returns_monthly]
 
 @frappe.whitelist(allow_guest=True)
 def execute(filters=None):
+    filters = {'company': 'Usedyetnew', 'selected_date': '2019-04-14'}
     args = {
 
     }
