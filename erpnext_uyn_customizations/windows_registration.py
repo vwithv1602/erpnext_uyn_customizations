@@ -40,7 +40,8 @@ def registration(info):
         "status": True,
         "customer_address_doc":customer_address_doc_name,
         "amazon_product_id": amazon_product_id,
-        "flipkart_product_id": flipkart_product_id
+        "flipkart_product_id": flipkart_product_id,
+        "fulfillment_channel": fulfillment_channel
     }
    
 def validate(info):
