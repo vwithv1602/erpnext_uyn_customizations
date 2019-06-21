@@ -12,16 +12,17 @@ from erpnext_ebay.vlog import vwrite
 @frappe.whitelist(allow_guest=True)
 def registration(info):
     info = ast.literal_eval(info)
-    if not validate(info):
-        return {
-                'status':False
-            }
+    
+    # Getting the product id for the fulfillment Channel.
     item_code_of_registering_serial_no = frappe.db.get_value("Serial No",{'name': info['serial_no']},'item_code')
     flipkart_product_id = frappe.db.get_value("Item", {'name':item_code_of_registering_serial_no},'flipkart_product_id')
     amazon_product_id = frappe.db.get_value("Item", {'name':item_code_of_registering_serial_no},'amazon_product_id')
+    
+    # Getting the sales order id for the order id provided.
     amazon_sales_order_id = frappe.db.get_value("Sales Order", {'amazon_order_id':info["order_id"]}, 'name')
-    vwrite(amazon_sales_order_id)
-    flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name') 
+    flipkart_sales_order_id = frappe.db.get_value("Sales Order", {'flipkart_order_id':info["order_id"]}, 'name')
+    
+    fulfillment_channel = frappe.db.get_value("Sales Order",{'name':flipkart_sales_order_id or amazon_sales_order_id},'fulfillment_channel') 
     if not amazon_sales_order_id or flipkart_sales_order_id:
         return {
             'status': False,
@@ -54,11 +55,3 @@ def validate(info):
                 return False
     
     return True
-
-def validate_phone_number(phone):
-    validator = re.compile("^\d{10}$")
-    return bool(validator.match(phone))
-
-def validate_email_id(email_id):
-    validator = re.compile("[^@]+@[^@]+\.[^@]+")
-    return bool(validator.match(email_id))
