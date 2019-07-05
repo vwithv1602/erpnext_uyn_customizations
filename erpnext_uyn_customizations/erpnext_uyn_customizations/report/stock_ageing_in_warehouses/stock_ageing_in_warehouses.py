@@ -24,7 +24,7 @@ def get_columns():
 
 def get_stock_purchase_receipt_details():
 	stock_purchase_details = {}
-	stock_purchase_receipt_details_query = """select a.name,a.item_code,min(b.creation),DateDiff(NOW(),min(b.creation)) from `tabSerial No` a inner join `tabStock Ledger Entry` b on b.serial_no like CONCAT("%%",a.name,"%%") where a.warehouse not like "" and a.warehouse not in (select name from `tabWarehouse` where parent_warehouse="Team Members - Uyn") and a.item_group in ("Laptops") group by a.name"""
+	stock_purchase_receipt_details_query = """select a.name,a.item_code,min(b.creation),DateDiff(NOW(),min(b.creation)) from `tabSerial No` a inner join `tabStock Ledger Entry` b on b.serial_no like CONCAT("%%",a.name,"%%") where a.warehouse not like "" and a.warehouse not in (select name from `tabWarehouse` where parent_warehouse="Team Members - Uyn") and a.item_group in ("Laptops","Desktops","Mobiles") group by a.name"""
 
 	for stock_entry in frappe.db.sql(stock_purchase_receipt_details_query):
 		stock_purchase_details[stock_entry[0]] = [stock_entry[1],stock_entry[2],stock_entry[3]]
@@ -33,7 +33,7 @@ def get_stock_purchase_receipt_details():
 
 def get_stock_current_warehouse_details():
 	stock_current_warehouse_details = {}
-	stock_current_warehouse_details_query = """select a.name,a.item_code,max(b.creation),DateDiff(NOW(),max(b.creation)),a.warehouse from `tabSerial No` a inner join `tabStock Ledger Entry` b on b.serial_no like CONCAT("%%",a.name,"%%") where a.warehouse not like "" and a.warehouse not in (select name from `tabWarehouse` where parent_warehouse="Team Members - Uyn") and a.item_group in ("Laptops") group by a.name"""
+	stock_current_warehouse_details_query = """select a.name,a.item_code,max(b.creation),DateDiff(NOW(),max(b.creation)),a.warehouse from `tabSerial No` a inner join `tabStock Ledger Entry` b on b.serial_no like CONCAT("%%",a.name,"%%") where a.warehouse not like "" and a.warehouse not in (select name from `tabWarehouse` where parent_warehouse="Team Members - Uyn") and a.item_group in ("Laptops","Desktops","Mobiles") group by a.name"""
 
 	for stock_entry in frappe.db.sql(stock_current_warehouse_details_query):
 		stock_current_warehouse_details[stock_entry[0]] = [stock_entry[1],stock_entry[2],stock_entry[3],stock_entry[4]]
