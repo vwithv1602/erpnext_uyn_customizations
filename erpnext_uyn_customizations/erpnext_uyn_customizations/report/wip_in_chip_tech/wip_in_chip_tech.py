@@ -15,6 +15,7 @@ def get_columns():
 		_("Item Code") + ":Data:450",
 		_("Warehouse") + ":Data:120",
 		_("Creation Date") + ":Date:80",
+		_("AGE") + ":Data:120",
 		_("Material Request") + ":Link/Material Request:120",
 		_("Requested By") + ":Data:160",
 		_("Status") + ":Data:120"
@@ -28,7 +29,8 @@ def get_data():
 	res = frappe.db.sql(sql,as_dict=1)
 	data = []
 	for r in res:
-		data.append([r.get("name"),r.get("item_code"),r.get("warehouse"),str(r.get("purchase_date")),r.get("material_request"),r.get("requested_by"),r.get("Status")])
+		age = frappe.db.get_value('Serial No',{'name':r.get('name')},'age_in_warehouse')
+		data.append([r.get("name"),r.get("item_code"),r.get("warehouse"),str(r.get("purchase_date")),age,r.get("material_request"),r.get("requested_by"),r.get("Status")])
 	ordered_data = sorted(data, key=lambda k: k[3])
 	return ordered_data
 
