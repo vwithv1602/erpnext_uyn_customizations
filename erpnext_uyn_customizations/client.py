@@ -38,6 +38,19 @@ def get_check_list_based_on_inspection_type(doctype, fields=None, filters=None, 
     return checks_result
 
 @frappe.whitelist()
+def get_sync_attributes_by_item_group(item_group="Laptops"):
+    """
+        Returns a list of sync attributes for the shopify integration.
+        Input:
+            item_group: The sync attributes are based on the item group of
+            the item for example laptops or mobiles. 
+    """
+    sync_attribute_query = """select attributes from `tabItem Group Sync Attributes` where parent = '{0}'""".format(item_group)
+    sync_attribute_result = frappe.db.sql(sync_attribute_query,as_dict=1)
+    sync_attribute_result.sort(key= lambda x :('URL' not in x['attributes'],x))
+    return sync_attribute_result
+
+@frappe.whitelist()
 def get_doctype_details(doctype, fields=None, filters=None, order_by=None,limit_start=None, limit_page_length=20, parent=None):
     # filters = ast.literal_eval(filters)
     filters = json.loads(filters)
@@ -366,3 +379,17 @@ def get_future_stock_entry(serial_nos, posting_date, posting_time):
             return result
     result['status'] = True
     return result
+
+@frappe.whitelist()
+def sync_sales_order_contact():
+    enqueue("erpnext_uyn_customizations.client.update_sales_order_contact", queue='long')
+    frappe.msgprint(_("Queued for syncing. It may take a few minutes to complete."))
+
+def update_sales_order_contact():
+
+    order_id_contact_map_query = """select so.name,a.phone from `tabSales Order` as so inner join `tabAddress` as a on so.customer_address = a.name where so.creation > '2019-07-10' and a.modified_by = 'it@usedyetnew.com'"""
+    order_id_contact_map = frappe.db.sql(order_id_contact_map_query,as_dict = 1)
+
+    for order_id_and_contact in order_id_contact_map:
+        update_query = """update `tabSales Order` set contact_mobile = '{contact_mobile}' where name = '{name}'""".format(**order_id_and_contact)
+        frappe.db.sql(update_query)
