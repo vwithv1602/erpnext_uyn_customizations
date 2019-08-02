@@ -391,5 +391,5 @@ def update_sales_order_contact():
     order_id_contact_map = frappe.db.sql(order_id_contact_map_query,as_dict = 1)
 
     for order_id_and_contact in order_id_contact_map:
-        update_query = """update `tabSales Order` set contact_mobile = '{contact_mobile}' where name = '{name}'""".format(**order_id_and_contact)
+        update_query = """update `tabSales Order` set contact_mobile = '{phone}' where name = '{name}'""".format(**order_id_and_contact)
         frappe.db.sql(update_query)
