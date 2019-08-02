@@ -10,9 +10,11 @@ from .vlog import vwrite
 
 urls = {
     'list_orders': 'https://api.flipkart.net/sellers/v3/shipments/filter/',
-    'shipment_id_details': 'https://api.flipkart.net/sellers/v3/shipments/'
+    'shipment_id_details': 'https://api.flipkart.net/sellers/v3/shipments/',
+    'list_order_information': 'https://api.flipkart.net/sellers/listings/v3/',
+    'update_inventory': 'https://api.flipkart.net/sellers/listings/v3/update/inventory'
 }
-def get_request(path,params):
+def get_request(path=,params={}):
     settings = get_flipkart_settings()
     lastSyncString = settings.last_sync_datetime
     lastSyncString = lastSyncString[:19]
@@ -37,8 +39,31 @@ def get_request(path,params):
         r = requests.get(url, headers=headers)
         content = r.__dict__.get("_content")
         result = json.loads(content)
+        vwrite(result)
         response = result.get("shipments")
-
+    elif path == 'list_order_information':
+        headers = {"Content-Type": "application/json", "Authorization":authorization}
+        url = "{0}{1}".format(urls[path],params.get('skuId'))
+        r = requests.get(url,headers=headers)
+        content = r.__dict__.get('_content')
+        result = json.loads(content)
+        response = result.get('available').get(params.get('skuId'))
+    elif path == 'update_inventory':
+        payload = {}
+        skuId = params.get('skuId')
+        payload[skuId] = {}
+        payload[skuId]['product_id'] = params.get('productId')
+        payload[skuId]['locations'] = []
+        temp_location_value = {'id': params.get('locationId'),'inventory': params.get('inventory_value')}
+        payload[skuId]['locations'].append(temp_location_value)
+        payload = json.dumps(payload)
+        vwrite(payload)
+        payload = payload.replace('"{0}"'.format(params.get('inventory_value')), str(params.get('inventory_value')))
+        headers = {"Content-Type": "application/json", "Authorization":authorization}
+        r = requests.post(urls[path], data=payload, headers=headers)
+        content = r.__dict__.get("_content")
+        result = json.loads(content)
+        response = result
     return response
     
 
