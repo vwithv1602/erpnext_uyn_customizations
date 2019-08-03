@@ -34,7 +34,6 @@ def sync_flipkart_orders():
         vwrite("No orders received")
         return False
     for flipkart_order in get_flipkart_orders_array:
-	vwrite(flipkart_order)
         params = {'shipmentId':flipkart_order.get("shipmentId")}
         shipment_id_details = get_request('shipment_id_details',params)
         order_item_details = {
