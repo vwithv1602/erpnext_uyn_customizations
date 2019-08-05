@@ -14,7 +14,7 @@ urls = {
     'list_order_information': 'https://api.flipkart.net/sellers/listings/v3/',
     'update_inventory': 'https://api.flipkart.net/sellers/listings/v3/update/inventory'
 }
-def get_request(path=,params={}):
+def get_request(path,params={}):
     settings = get_flipkart_settings()
     lastSyncString = settings.last_sync_datetime
     lastSyncString = lastSyncString[:19]
