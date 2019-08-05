@@ -10,7 +10,7 @@ from vlog import vwrite
 
 @frappe.whitelist()
 def sync_flipkart():
-    enqueue("erpnext_uyn_customizations.flipkart_api.sync_flipkart_resources", queue='long')
+    #enqueue("erpnext_uyn_customizations.flipkart_api.sync_flipkart_resources", queue='long')
     frappe.msgprint(_("Queued for syncing. It may take a few minutes to an hour if this is your first sync."))
 
 def sync_flipkart_resources():
