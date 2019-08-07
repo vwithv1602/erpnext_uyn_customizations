@@ -30,7 +30,7 @@ def registration(info):
                     'customer_address_doc': customer_address_doc_name
                 }
 
-    customer_addres_doc_name_from_serial_no_query = """select so.customer_address from `tabDelivery Note Item`  as dni inner join `tabDelivery Note` as dn on dn.name = dni.parent inner join `tabSales Order` as so on so.name = dni.against_sales_order where dni.serial_no like "%%{0}%%" and dn.status = "Completed" order by dni.creation DESC LIMIT 1""".format(info['serial_no'].strip())
+    customer_addres_doc_name_from_serial_no_query = """select so.customer_address from `tabDelivery Note Item`  as dni inner join `tabDelivery Note` as dn on dn.name = dni.parent inner join `tabSales Order` as so on so.name = dni.against_sales_order where dni.serial_no like "%%{0}%%" and dn.docstatus = 1 order by dni.creation DESC LIMIT 1""".format(info['serial_no'].strip())
     customer_address_doc_name_dict = frappe.db.sql(customer_addres_doc_name_from_serial_no_query, as_dict=1)
     customer_address_doc_name = customer_address_doc_name_dict[0]['customer_address']
     if customer_address_doc_name:
