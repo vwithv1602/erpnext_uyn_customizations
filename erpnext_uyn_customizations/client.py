@@ -332,7 +332,7 @@ def get_place_of_supply_for_si(so):
 
 @frappe.whitelist()
 def can_save_mreq(logged_in_user,against_serial_no=None):
-    vwrite("in can_save_mreq by: %s"%logged_in_user)
+    #vwrite("in can_save_mreq by: %s"%logged_in_user)
     # This function accepts logged_in_user,against_serial_no and will return true or false based on the below condition.
     # Irrespective of mreq status (closed/pending/ordered), if a material request is present against a serial no. block further requests.
     # Allow only authorized persons (having role - Material Request Manager) to raise material request
@@ -341,7 +341,7 @@ def can_save_mreq(logged_in_user,against_serial_no=None):
     if against_serial_no == '':
         return {"access":""}
     mr_for_item_against_sno_sql = """ select mr.status,mri.name,mri.parent from `tabMaterial Request Item` mri inner join `tabMaterial Request` mr on mr.name=mri.parent where mri.serial_no='{0}' and mri.docstatus=1 and mr.status in ('Ordered','Partially Ordered','Stopped') """.format(against_serial_no)
-    vwrite(mr_for_item_against_sno_sql)
+    #vwrite(mr_for_item_against_sno_sql)
     mr_for_item_against_sno_res = frappe.db.sql(mr_for_item_against_sno_sql,as_dict=1)
     if len(mr_for_item_against_sno_res):
         prev_mr = mr_for_item_against_sno_res[0].get("parent")
