@@ -43,3 +43,12 @@ def registration(info):
             'status': False,
             'error': "Address Could not be found"
         }
+
+@frappe.whitelist(allow_guest=True)
+def testingfunction(info):
+    info = ast.literal_eval(info)
+    return {
+        "name":"testing",
+        "message": "Aman chutiya hai.",
+        "Serial Number": info["serial_no"]
+    }
