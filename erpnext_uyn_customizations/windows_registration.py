@@ -48,8 +48,10 @@ def registration(info):
 @frappe.whitelist(allow_guest=True)
 def useractioninfo(info):
     info = ast.literal_eval(info)
+    serial_no = info["serial_no"]
     # info['process']  = ["Installation", "Initiation","Uninstallation"]
     return {
-        "name":"Installation"
+        "Status":"Installation"
+        "Serial Number": info["serial_no"]
     }
 
