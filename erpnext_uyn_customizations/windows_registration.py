@@ -47,11 +47,8 @@ def registration(info):
 
 @frappe.whitelist(allow_guest=True)
 def useractioninfo(info):
-    import datetime
     info = ast.literal_eval(info)
-    if info["serial_no"] != "":
-        update_query = """update `tabSerial No` set installation_time="""
+    # info['process']  = ["Installation", "Initiation","Uninstallation"]
     return {
-        "name":"Installation",
-        "Serial Number": info["serial_no"]
+        "name":"Installation"
     }
