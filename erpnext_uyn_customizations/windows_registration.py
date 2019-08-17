@@ -50,5 +50,4 @@ def testingfunction(info):
     return {
         "name":"testing",
         "message": "Aman chutiya hai.",
-        "Serial Number": info["serial_no"]
     }
