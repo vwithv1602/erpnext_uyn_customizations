@@ -5,6 +5,7 @@ import frappe.model
 import frappe.utils
 import json
 import os
+import datetime
 import re
 import ast
 import requests
@@ -45,10 +46,12 @@ def registration(info):
         }
 
 @frappe.whitelist(allow_guest=True)
-def testingfunction(info):
+def useractioninfo(info):
+    import datetime
     info = ast.literal_eval(info)
+    if info["serial_no"] != "":
+        update_query = """update `tabSerial No` set installation_time="""
     return {
-        "name":"testing",
-        "message": "Aman chutiya hai.",
+        "name":"Installation",
         "Serial Number": info["serial_no"]
     }
