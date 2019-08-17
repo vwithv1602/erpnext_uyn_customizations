@@ -46,12 +46,19 @@ def registration(info):
         }
 
 @frappe.whitelist(allow_guest=True)
-def useractioninfo(info):
-    info = ast.literal_eval(info)
+def useractioninfo(info={"serial_no":"R9TXGVN"}):
+    import datetime
+    # Indian time is ahead of UTC by 5 hours and 30 minutes.
+    current_time = str(datetime.datetime.now() + datetime.timedelta(hours = 5, minutes=30))
+    #info = ast.literal_eval(info)
     serial_no = info["serial_no"]
     # info['process']  = ["Installation", "Initiation","Uninstallation"]
+    if info['serial_no'] != "":
+        update_query = """update `tabSerial No` set installation_time = '{0}' where name = '{1}'""".format(current_time,info["serial_no"])
+        frappe.db.sql(update_query,as_dict=1)
+        frappe.db.commit()
     return {
-        "Status":"Installation"
+        "Status":"Installation",
         "Serial Number": info["serial_no"]
     }
 
