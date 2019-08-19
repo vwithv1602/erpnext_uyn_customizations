@@ -51,15 +51,13 @@ def is_item_with_customer(info):
     if info["serial_no"] != "":
         check_query = """select warehouse from `tabSerial No` where name = '{0}'""".format(info['serial_no'])
         warehouse_name = frappe.db.sql(check_query,as_dict=1)
-        if warehouse_name:
+        if warehouse_name and warehouse[0]['warehouse'] == "":
             return {
-                "status": True,
-                "warehouse name":warehouse_name[0]['warehouse']
+                "status": True
             }
         else:
             return {
-                "status": True,
-                "warehouse name":""
+                "status": False            
             }
 
     else:
