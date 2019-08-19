@@ -46,6 +46,28 @@ def registration(info):
         }
 
 @frappe.whitelist(allow_guest=True)
+def is_item_with_customer(info):
+    info = ast.literal_eval(info)
+    if info["serial_no"] != "":
+        check_query = """select warehouse from `tabSerial No` where name = '{0}'""".format(info['serial_no'])
+        warehouse_name = frappe.db.sql(check_query,as_dict=1)
+        if warehouse_name:
+            return {
+                "status": True,
+                "warehouse name":warehouse_name[0]['warehouse']
+            }
+        else:
+            return {
+                "status": True,
+                "warehouse name":""
+            }
+
+    else:
+        return {
+            "status":False,
+            "Error":"No serial Number provided"
+        }
+@frappe.whitelist(allow_guest=True)
 def useractioninfo(info):
     import datetime
     # Indian time is ahead of UTC by 5 hours and 30 minutes.
