@@ -395,11 +395,19 @@ def update_sales_order_contact():
         frappe.db.sql(update_query)
     
 @frappe.whitelist()
-def all_items_in_previous_tech_repacks(serial_no="lrvappk"):
+def all_items_in_previous_tech_repacks(serial_no):
 
     # Find all the previous tech repack that are submitted.
     items_repacked_earlier_query = """select distinct(trgi.item_code) from `tabTech Repack` tr inner join `tabTech Repack Taken Items` trgi on tr.name = trgi.parent where tr.docstatus = 1 and tr.barcode='{0}'""".format(serial_no)
     items_repacked_earlier = frappe.db.sql(items_repacked_earlier_query,as_list=1)
     items_repacked_earlier = [i[0] for i in items_repacked_earlier]
-    
     return items_repacked_earlier
+
+@frappe.whitelist()
+def get_item_code_from_fru(fru_number):
+    fru_from_item_code_query = """select name from `tabItem` where fru_number = '{0}'""".format(fru_number)
+    fru_from_item_code = frappe.db.sql(fru_from_item_code_query,as_dict=1)
+    if fru_from_item_code:
+        return fru_from_item_code[0].get("name")
+    else:
+        return ""
