@@ -411,3 +411,12 @@ def get_item_code_from_fru(fru_number):
         return fru_from_item_code[0].get("name")
     else:
         return ""
+
+@frappe.whitelist()
+def get_fru_from_item_code(item_code):
+    item_code_from_fru_query = """select fru_number from `tabItem` where name = '{0}'""".format(item_code)
+    item_code_from_fru = frappe.db.sql(item_code_from_fru_query,as_dict=1)
+    if item_code_from_fru:
+        return item_code_from_fru[0].get("fru_number")
+    else:
+        return ""
