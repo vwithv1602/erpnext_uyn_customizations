@@ -420,3 +420,13 @@ def get_fru_from_item_code(item_code):
         return item_code_from_fru[0].get("fru_number")
     else:
         return ""
+
+@frappe.whitelist()
+def update_items_for_fru(item_table):
+    item_table = ast.literal_eval(item_table)
+    for item in item_table:
+        update_query = """update `tabItem` set fru_number = '{0}' where name = '{1}'""".format(item.get("fru_number"),item.get("item_name"))
+        frappe.db.sql(update_query)
+        frappe.db.commit()
+    
+    return True
