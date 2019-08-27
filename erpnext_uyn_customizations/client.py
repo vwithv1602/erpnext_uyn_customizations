@@ -430,3 +430,23 @@ def update_items_for_fru(item_table):
         frappe.db.commit()
     
     return True
+
+@frappe.whitelist()
+def check_item_parent_group(item_group):
+
+    is_item_parent_group_products_query = """select parent_item_group from `tabItem Group` where name = '{}' and parent_item_group = 'Products'""".format(item_group)
+    try:
+        is_item_parent_group_products = frappe.db.sql(is_item_parent_group_products_query,as_dict=1)
+        print(is_item_parent_group_products)
+        if is_item_parent_group_products:
+            return {
+                "status": True
+            }
+        else:
+            return {
+                "status": False
+            }
+    except:
+        return {
+            "status": False
+        }
