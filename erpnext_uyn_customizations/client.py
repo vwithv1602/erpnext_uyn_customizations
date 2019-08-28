@@ -425,7 +425,7 @@ def get_fru_from_item_code(item_code):
 def update_items_for_fru(item_table):
     item_table = ast.literal_eval(item_table)
     for item in item_table:
-        update_query = """update `tabItem` set fru_number = '{0}' where name = '{1}'""".format(item.get("fru_number"),item.get("item_name"))
+        update_query = """update `tabItem` set fru_number = '{0}' where name = '{1}' and fru_number is null""".format(item.get("fru_number"),item.get("item_name"))
         frappe.db.sql(update_query)
         frappe.db.commit()
     
