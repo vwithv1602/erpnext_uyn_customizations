@@ -404,15 +404,6 @@ def all_items_in_previous_tech_repacks(serial_no):
     return items_repacked_earlier
 
 @frappe.whitelist()
-def get_item_code_from_fru(fru_number):
-    fru_from_item_code_query = """select name from `tabItem` where fru_number = '{0}'""".format(fru_number)
-    fru_from_item_code = frappe.db.sql(fru_from_item_code_query,as_dict=1)
-    if fru_from_item_code:
-        return fru_from_item_code[0].get("name")
-    else:
-        return ""
-
-@frappe.whitelist()
 def get_fru_from_item_code(item_code):
     item_code_from_fru_query = """select fru_number from `tabItem` where name = '{0}'""".format(item_code)
     item_code_from_fru = frappe.db.sql(item_code_from_fru_query,as_dict=1)
@@ -428,8 +419,23 @@ def update_items_for_fru(item_table):
         update_query = """update `tabItem` set fru_number = '{0}' where name = '{1}' and fru_number is null""".format(item.get("fru_number"),item.get("item_name"))
         frappe.db.sql(update_query)
         frappe.db.commit()
-    
     return True
+
+@frappe.whitelist()
+def is_fru_required(item_code="Yellow grade A Stickers"):
+    item_group = frappe.get_value("Item",item_code,"item_group")
+    item_group_parent = frappe.get_value("Item Group",item_group,"parent_item_group")
+    not_required_item_group = ["Laptop RAMs","Laptop harddisk"]
+    no_fru_required_item_group = "sticker"
+    if item_group == "Desktop Spares" or (item_group_parent == "Laptop Spares" and (item_group not in not_required_item_group) and (no_fru_required_item_group not in item_group.lower())):
+        return {
+            "status": True,
+            "item_group": item_group
+        }
+    return {
+        "status":False,
+        "item_group": item_group
+    }
 
 @frappe.whitelist()
 def check_item_parent_group(item_group):
