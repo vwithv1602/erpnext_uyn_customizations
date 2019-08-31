@@ -422,7 +422,7 @@ def update_items_for_fru(item_table):
     return True
 
 @frappe.whitelist()
-def is_fru_required(item_code="Yellow grade A Stickers"):
+def is_fru_required(item_code):
     item_group = frappe.get_value("Item",item_code,"item_group")
     item_group_parent = frappe.get_value("Item Group",item_group,"parent_item_group")
     not_required_item_group = ["Laptop RAMs","Laptop harddisk"]
