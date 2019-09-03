@@ -14,11 +14,9 @@ class Rejects(Document):
 def get_warehouse_sequence(warehouse):
 	seq_sql = """ select warehouse_sequence_number from `tabWarehouse` where warehouse_name='{0}' """.format(warehouse[:-6])
 	return frappe.db.sql(seq_sql,as_dict=1)[0].get("warehouse_sequence_number")
-def save_reject(rej_obj):
+def save_reject(rej_obj,is_rejected):
 	# check if reject
-	from_warehouse_sequence = get_warehouse_sequence(rej_obj.get("from_warehouse"))
-	to_warehouse_sequence = get_warehouse_sequence(rej_obj.get("to_warehouse"))
-	if from_warehouse_sequence!='' and to_warehouse_sequence!='' and from_warehouse_sequence>to_warehouse_sequence:
+	if is_rejected == "Yes":
 		rej_doc = frappe.get_doc({ 
 			"doctype": "Rejects",
 			"inspected_by": rej_obj.get("inspected_by"),
@@ -57,7 +55,7 @@ def log_reject(reject,method):
 	if method == 'on_submit' and reject.__dict__.get("purpose")=='Material Transfer':
 		for item in items:
 			itm = item.__dict__
-			vwrite(itm)
+			is_rejected = reject.__dict__.get("is_rejected")
 			inspection_type = get_inspection_type(itm.get("t_warehouse"))
 			last_qc = get_last_qc(itm.get("serial_no"),inspection_type)
 			if last_qc:
@@ -73,4 +71,4 @@ def log_reject(reject,method):
 					"ste_name": reject.__dict__.get("name"),
 					"qi_name": last_qc.get("name"),
 				}
-				save_reject(obj)
+				save_reject(obj,is_rejected)
