@@ -256,26 +256,146 @@ class ProductivityInsights(object):
 
     def get_company_net_productivity(self):
         net_today = """ 
-            (select count(distinct sed.serial_no) as daily from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date = '{1}' and sed.t_warehouse='G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
-            union
-            (select count(distinct sed.serial_no) as daily from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date = '{1}' and sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse<>'G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
-            union
-            (select count(distinct dni.serial_no) as daily from `tabDelivery Note Item` dni inner join `tabDelivery Note` dn on dn.name=dni.parent inner join tabItem i on i.item_code=dni.item_code where i.item_group in ('Laptops','Desktops') and dn.posting_date = '{1}' and dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and dn.is_return='0' and dn.docstatus='1')
+            (
+                select count(distinct sed.serial_no) as daily from `tabStock Entry Detail` sed 
+                inner join `tabStock Entry` se on sed.parent = se.name 
+                inner join `tabItem` i on i.name=sed.item_code 
+                where 
+                i.item_group in ("Desktops","Laptops") and 
+                se.posting_date='{1}' and 
+                (
+                    (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                    or 
+                    (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+                ) and 
+                se.purpose = 'Material Transfer' and 
+                se.docstatus=1 and 
+                sed.serial_no not in 
+                (
+                    select sed.serial_no from `tabStock Entry Detail` sed 
+                    inner join `tabStock Entry` se on sed.parent = se.name 
+                    inner join `tabItem` i on i.name=sed.item_code 
+                    where i.item_group in ("Desktops","Laptops") and 
+                    se.posting_date<'{1}' and 
+                    se.posting_date>='{2}' and 
+                    (
+                        (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                        or 
+                        (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+                    ) and 
+                    se.purpose = 'Material Transfer' and 
+                    se.docstatus=1
+                )
+            )
+            union 
+            (
+                select count(distinct dni.serial_no) as Daily from `tabDelivery Note Item` dni 
+                inner join `tabDelivery Note` dn on dn.name=dni.parent 
+                inner join `tabItem` i on i.name=dni.item_code 
+                where 
+                i.item_group in ('Desktops','Laptops') and 
+                dn.posting_date='{1}' and 
+                dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
+                dn.docstatus=1 and 
+                dn.is_return=0
+            )   
         """.format("%Macbook%",self.selected_date_str)
         net_week = """
-            (select count(distinct sed.serial_no) as weekly from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date >='{0}' and se.posting_date <= '{1}' and sed.t_warehouse='G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer' and MONTH(se.posting_date)=MONTH('{3}') and YEAR(se.posting_date)=YEAR('{3}'))
-            union
-            (select count(distinct sed.serial_no) as weekly from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date >='{0}' and se.posting_date <= '{1}' and sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse<>'G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer' and MONTH(se.posting_date)=MONTH('{3}') and YEAR(se.posting_date)=YEAR('{3}'))
-            union
-            (select count(distinct dni.serial_no) as weekly from `tabDelivery Note Item` dni inner join `tabDelivery Note` dn on dn.name=dni.parent inner join tabItem i on i.item_code=dni.item_code where i.item_group in ('Laptops','Desktops') and dn.posting_date >='{0}' and dn.posting_date <= '{1}' and dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and dn.is_return='0' and dn.docstatus='1' and MONTH(dn.posting_date)=MONTH('{3}') and YEAR(dn.posting_date)=YEAR('{3}'))
+            (
+                select count(distinct sed.serial_no) as weekly from `tabStock Entry Detail` sed 
+                inner join `tabStock Entry` se on sed.parent = se.name 
+                inner join `tabItem` i on i.name=sed.item_code 
+                where 
+                i.item_group in ("Desktops","Laptops") and 
+                se.posting_date>='{0}' and 
+                se.posting_date<='{1}' and 
+                (   
+                    (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                    or 
+                    (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+                ) and 
+                se.purpose = 'Material Transfer'and 
+                se.docstatus=1 and 
+                sed.serial_no not in 
+                (
+                    select sed.serial_no from `tabStock Entry Detail` sed 
+                    inner join `tabStock Entry` se on sed.parent = se.name 
+                    inner join `tabItem` i on i.name=sed.item_code 
+                    where 
+                    i.item_group in ("Desktops","Laptops") and 
+                    se.posting_date<'{0}' and 
+                    se.posting_date>='{4}' and 
+                    (
+                        (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                        or 
+                        (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+                    ) and 
+                    se.purpose = 'Material Transfer' and 
+                    se.docstatus=1
+                )
+            ) 
+            union 
+            (
+                select count(distinct dni.serial_no) as weekly from `tabDelivery Note Item` dni 
+                inner join `tabDelivery Note` dn on dn.name=dni.parent 
+                inner join `tabItem` i on i.name=dni.item_code 
+                where 
+                i.item_group in ('Desktops','Laptops') and 
+                dn.posting_date>='{0}' and 
+                dn.posting_date<='{1}' and 
+                dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
+                dn.docstatus=1 and 
+                dn.is_return=0
+            )
         """.format(self.weekstartstr,self.weekendstr,"%Macbook%",self.selected_date_str)
         net_month = """
-            (select count(distinct sed.serial_no) as monthly from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and MONTH(se.posting_date)=MONTH('{1}') and YEAR(se.posting_date) = YEAR('{1}') and sed.t_warehouse='G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
-            union
-            (select count(distinct sed.serial_no) as monthly from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and MONTH(se.posting_date)=MONTH('{1}') and YEAR(se.posting_date) = YEAR('{1}') and sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse<>'G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
-            union
-            (select count(distinct dni.serial_no) as monthly from `tabDelivery Note Item` dni inner join `tabDelivery Note` dn on dn.name=dni.parent inner join tabItem i on i.item_code=dni.item_code where i.item_group in ('Laptops','Desktops') and MONTH(dn.posting_date)=MONTH('{1}') and YEAR(dn.posting_date) = YEAR('{1}') and dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and dn.is_return='0' and dn.docstatus='1')
-        """.format("%Macbook%",self.selected_date_str)
+            (
+                select count(distinct sed.serial_no) as monthly from `tabStock Entry Detail` sed 
+                inner join `tabStock Entry` se on sed.parent = se.name 
+                inner join `tabItem` i on i.name=sed.item_code 
+                where 
+                i.item_group in ("Desktops","Laptops") and 
+                MONTH(se.posting_date)=MONTH('{1}') and 
+                YEAR(se.posting_date)=YEAR('{1}') and
+                (
+                    (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                    or 
+                    (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+                ) and 
+                se.purpose = 'Material Transfer'and 
+                se.docstatus=1 and 
+                sed.serial_no not in 
+                (
+                    select sed.serial_no from `tabStock Entry Detail` sed 
+                    inner join `tabStock Entry` se on sed.parent = se.name 
+                    inner join `tabItem` i on i.name=sed.item_code 
+                    where 
+                    i.item_group in ("Desktops","Laptops") and
+                    se.posting_date>='{2}' and
+                    se.posting_date<'{3}' and
+                    (
+                        (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                        or 
+                        (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+                    ) and 
+                    se.purpose = 'Material Transfer' and 
+                    se.docstatus=1
+                )
+            ) 
+            union 
+            (
+                select count(distinct dni.serial_no) as monthly from `tabDelivery Note Item` dni 
+                inner join `tabDelivery Note` dn on dn.name=dni.parent 
+                inner join `tabItem` i on i.name=dni.item_code 
+                where 
+                i.item_group in ('Desktops','Laptops') and 
+                MONTH(dn.posting_date)=MONTH('{1}') and
+                YEAR(dn.posting_date)=YEAR('{1}') and
+                dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
+                dn.docstatus=1 and 
+                dn.is_return=0
+            )
+            """.format("%Macbook%",self.selected_date_str)
         gross_today = """ 
             (select count(sed.serial_no) as daily from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date = '{1}' and sed.t_warehouse='G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
             union
