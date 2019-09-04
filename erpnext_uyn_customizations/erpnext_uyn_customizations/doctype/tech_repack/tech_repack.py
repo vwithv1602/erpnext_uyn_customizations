@@ -14,6 +14,20 @@ from datetime import datetime
 
 class TechRepack(Document):
 	pass
+def get_item_grade(item_code):
+	item_grade_query = """
+		select iva.attribute_value from `tabItem Variant Attribute` iva 
+		inner join `tabItem` i on i.name=iva.parent 
+		where 
+			i.variant_of is not NULL and 
+			iva.attribute="Grade" and 
+			i.name = '{0}'
+	""".format(item_code)
+	item_code_grade = frappe.db.sql(item_grade_query,as_dict=1)
+	if item_code_grade:
+		return item_code_grade[0]['attribute_value']
+	else:
+		return ""
 @frappe.whitelist()
 def close_tech_repack(stock_entry,method):
 	tr_no = stock_entry.__dict__.get("reference_tech_repack_no")
@@ -127,7 +141,12 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		#target.basic_rate=get_basic_rate(source.item_code,'source')
 		args = frappe._dict({"item_code":source.item_code,"qty":-source.qty,"allow_zero_valuation":1,"warehouse":source.source_warehouse,"voucher_type":"Stock Entry","cost_center":"Main - Uyn","posting_date":str(datetime.now().isoformat())[:10],"posting_time":str(datetime.now().isoformat())[11:]})
 		from erpnext.stock.utils import get_incoming_rate
-		target.basic_rate = get_incoming_rate(args)
+		grade = get_item_grade(target.item_code)
+		if grade == "Grade D":
+			target.basic_rate = 0
+			target.allow_zero_valuation_rate = 1
+		else:	
+			target.basic_rate = get_incoming_rate(args)
 		global total_source_rate
 		total_source_rate = (total_source_rate or 0) + (target.basic_rate or 0)
 	def update_given_item(source, target, source_parent):
@@ -148,7 +167,12 @@ def make_repack(source_name, target_doc=None, ignore_permissions=False):
 		#target.basic_rate=get_basic_rate(source.item_code,'target')
 		args = frappe._dict({"item_code":source.item_code,"qty":-source.qty,"allow_zero_valuation":1,"warehouse":source.target_warehouse,"voucher_type":"Stock Entry","cost_center":"Main - Uyn","posting_date":str(datetime.now().isoformat())[:10],"posting_time":str(datetime.now().isoformat())[11:]})
 		from erpnext.stock.utils import get_incoming_rate
-		target.basic_rate = get_incoming_rate(args)
+		grade = get_item_grade(target.item_code)
+		if grade == "Grade D":
+			target.basic_rate = 0
+			target.allow_zero_valuation_rate = 1
+		else:	
+			target.basic_rate = get_incoming_rate(args)
 		global total_target_rate
 		total_target_rate = total_target_rate + (target.basic_rate or 0)
 	
