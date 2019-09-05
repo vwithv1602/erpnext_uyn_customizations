@@ -18,6 +18,7 @@ from erpnext_ebay.vlog import vwrite
 
 class ProductivityInsights(object):
     def __init__(self, filters=None):
+        vwrite(filters)
         self.filters = frappe._dict(filters or {})
         if not filters.get("selected_date"):
             self.selected_date_obj = datetime.strptime(datetime.today().strftime('%Y-%m-%d'), '%Y-%m-%d')
@@ -39,6 +40,9 @@ class ProductivityInsights(object):
         self.monthdate = self.get_month_day_range(self.selected_date_obj)
         self.monthstartstr = str(self.monthdate[0])
         self.monthendstr = str(self.monthdate[1]+timedelta(1))
+        self.two_months_before_date = str(self.selected_date_obj - timedelta(days=60))[:10]
+        self.two_months_before_week = str(self.selected_date_obj - timedelta(days=self.selected_date_obj.weekday()) - timedelta(days=60))[:10]
+        self.two_months_before_cur_month = str(self.selected_date_obj.replace(day=1)-timedelta(days=60))[:10]
     
     def run(self, args):
 		data = self.get_data()
@@ -298,8 +302,8 @@ class ProductivityInsights(object):
                 dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
                 dn.docstatus=1 and 
                 dn.is_return=0
-            )   
-        """.format("%Macbook%",self.selected_date_str)
+            )
+        """.format("%Macbook%",self.selected_date_str,self.two_months_before_date)
         net_week = """
             (
                 select count(distinct sed.serial_no) as weekly from `tabStock Entry Detail` sed 
@@ -347,7 +351,7 @@ class ProductivityInsights(object):
                 dn.docstatus=1 and 
                 dn.is_return=0
             )
-        """.format(self.weekstartstr,self.weekendstr,"%Macbook%",self.selected_date_str)
+             """.format(self.weekstartstr,self.weekendstr,"%Macbook%",self.selected_date_str,self.two_months_before_week)
         net_month = """
             (
                 select count(distinct sed.serial_no) as monthly from `tabStock Entry Detail` sed 
@@ -395,7 +399,7 @@ class ProductivityInsights(object):
                 dn.docstatus=1 and 
                 dn.is_return=0
             )
-            """.format("%Macbook%",self.selected_date_str)
+            """.format("%Macbook%",self.selected_date_str,self.two_months_before_cur_month,str(self.selected_date_obj.replace(day=1)))
         gross_today = """ 
             (select count(sed.serial_no) as daily from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date = '{1}' and sed.t_warehouse='G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
             union
@@ -424,10 +428,10 @@ class ProductivityInsights(object):
         weekly_gross_prod_res = 0
         montly_gross_prod_res = 0
         for net_prod in frappe.db.sql(net_today,as_dict=1):
-			if net_prod.get("daily"):
+            if net_prod.get("daily"):
 				daily_net_prod_res += net_prod.get("daily")
         for net_prod in frappe.db.sql(net_week,as_dict=1):
-			if net_prod.get("weekly"):
+            if net_prod.get("weekly"):
 				weekly_net_prod_res += net_prod.get("weekly")        
         for net_prod in frappe.db.sql(net_month,as_dict=1):
             if net_prod.get("monthly"):
