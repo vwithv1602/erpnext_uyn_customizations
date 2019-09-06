@@ -17,11 +17,11 @@ def get_columns():
 	"""return columns bab on filters"""
 	columns = [
 
-		_("DN exists and App installed") + ":Data:120",
-		_("Registered within 2 days") + ":Data:120",
-		_("Registered within 5 days") + ":Data:120",
-		_("Registered within 8 days") + ":Data:120",
-		_("Registered within 12 days") + ":Data:120",
+		_("DN exists and App installed") + ":Data:180",
+		_("Registered within 2 days") + ":Data:180",
+		_("Registered within 5 days") + ":Data:180",
+		_("Registered within 8 days") + ":Data:180",
+		_("Registered within 12 days") + ":Data:180",
 	]
 	return columns
 
