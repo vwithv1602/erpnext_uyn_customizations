@@ -8,6 +8,7 @@ import frappe.model
 import frappe.utils
 import json, os
 import ast
+from frappe.utils.background_jobs import enqueue
 #from parse_erpnext_connector import parse_quality_inspection_report
 from erpnext_ebay.vlog import vwrite
 
