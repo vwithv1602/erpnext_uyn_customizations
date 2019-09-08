@@ -393,6 +393,7 @@ def update_sales_order_contact():
     for order_id_and_contact in order_id_contact_map:
         update_query = """update `tabSales Order` set contact_mobile = '{phone}' where name = '{name}'""".format(**order_id_and_contact)
         frappe.db.sql(update_query)
+        frappe.db.commit()
     
 @frappe.whitelist()
 def all_items_in_previous_tech_repacks(serial_no):
