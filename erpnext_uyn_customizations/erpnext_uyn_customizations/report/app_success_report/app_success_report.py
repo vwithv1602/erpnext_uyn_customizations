@@ -68,11 +68,11 @@ def get_data():
 
 	activated_within_two_days = count_of_laptops_registered_within(2,0)[0]['count']
 
-	activated_within_five_days = count_of_laptops_registered_within(5,3)[0]['count']
+	activated_within_five_days = count_of_laptops_registered_within(5,2)[0]['count']
 
-	activated_within_eight_days = count_of_laptops_registered_within(8,6)[0]['count']
+	activated_within_eight_days = count_of_laptops_registered_within(8,5)[0]['count']
 
-	activated_within_twelve_days = count_of_laptops_registered_within(12,9)[0]['count']
+	activated_within_twelve_days = count_of_laptops_registered_within(12,8)[0]['count']
 
 	return [[count_of_items_dned,activated_within_two_days,activated_within_five_days,activated_within_eight_days,activated_within_twelve_days]]
 
