@@ -39,7 +39,7 @@ def count_serial_numbers_with_app_installed_in_week():
 	count_dict = frappe.db.sql(serial_numbers_with_app_installed_query,as_dict=1)
 	return count_dict
 
-def count_of_laptops_registered_within(lt_days):
+def count_of_laptops_registered_within(lt_days,gt_days):
 	
 	count_of_laptops_registered_query = """
 	select count(sn.name) as count from `tabSerial No` sn
@@ -55,8 +55,9 @@ def count_of_laptops_registered_within(lt_days):
 		sn.initiation_time is not NULL and
 		a.modified > '{0}' and
 		a.modified <= '{1}' and
-		DATEDIFF(sn.initiation_time,a.modified) <= {2}
-	""".format(weeks_first_day,weeks_last_day,lt_days)
+		DATEDIFF(a.modified,sn.initiation_time) <= {2} and
+		DATEDIFF(a.modified,sn.initiation_time) > {3}
+	""".format(weeks_first_day,weeks_last_day,lt_days,gt_days)
 	count_dict = frappe.db.sql(count_of_laptops_registered_query,as_dict=1)
 	return count_dict
 
@@ -65,13 +66,13 @@ def get_data():
 	count_dict_of_items_dned = count_serial_numbers_with_app_installed_in_week()
 	count_of_items_dned = count_dict_of_items_dned[0]['count']
 
-	activated_within_two_days = count_of_laptops_registered_within(2)[0]['count']
+	activated_within_two_days = count_of_laptops_registered_within(2,0)[0]['count']
 
-	activated_within_five_days = count_of_laptops_registered_within(5)[0]['count']
+	activated_within_five_days = count_of_laptops_registered_within(5,2)[0]['count']
 
-	activated_within_eight_days = count_of_laptops_registered_within(8)[0]['count']
+	activated_within_eight_days = count_of_laptops_registered_within(8,5)[0]['count']
 
-	activated_within_twelve_days = count_of_laptops_registered_within(12)[0]['count']
+	activated_within_twelve_days = count_of_laptops_registered_within(12,8)[0]['count']
 
 	return [[count_of_items_dned,activated_within_two_days,activated_within_five_days,activated_within_eight_days,activated_within_twelve_days]]
 
