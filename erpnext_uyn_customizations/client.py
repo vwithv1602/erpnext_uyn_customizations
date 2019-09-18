@@ -46,9 +46,8 @@ def get_sync_attributes_by_item_group(item_group="Laptops"):
             item_group: The sync attributes are based on the item group of
             the item for example laptops or mobiles. 
     """
-    sync_attribute_query = """select attributes from `tabItem Group Sync Attributes` where parent = '{0}'""".format(item_group)
+    sync_attribute_query = """select attr from `tabIGSA` where parent = '{0}'""".format(item_group)
     sync_attribute_result = frappe.db.sql(sync_attribute_query,as_dict=1)
-    sync_attribute_result.sort(key= lambda x :('URL' not in x['attributes'],x))
     return sync_attribute_result
 
 @frappe.whitelist()
@@ -458,3 +457,21 @@ def check_item_parent_group(item_group):
         return {
             "status": False
         }
+
+@frappe.whitelist()
+def check_for_repeated_mreq(item_code,serial_no):
+
+    repeated_mreq_query = """select mr.name from `tabMaterial Request Item` mri 
+                            inner join `tabMaterial Request` mr on mri.parent=mr.name  
+                            where
+                                mr.docstatus = 1 and 
+                                item_code = '{0}' and 
+                                serial_no = '{1}'
+                            """.format(item_code,serial_no)
+    
+    all_mreq = frappe.db.sql(repeated_mreq_query, as_dict=1)
+    result = ""
+    for mreq_dict in all_mreq:
+        result += mreq_dict["name"]
+    
+    return {"mr_no":result}
