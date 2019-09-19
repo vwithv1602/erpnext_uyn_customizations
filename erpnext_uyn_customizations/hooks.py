@@ -91,11 +91,13 @@ app_license = "license.txt"
 # ---------------
 
 scheduler_events = {
-    "all": [
-		"erpnext_uyn_customizations.flipkart_api.sync_flipkart",
+  "all": [
+		"erpnext_uyn_customizations.flipkart_api.sync_flipkart",	
+	],
+	"daily": [
 		"erpnext_uyn_customizations.sync_age.sync_now",
-		"erpnext_uyn_customizations.client.sync_sales_order_contact"
-	]
+ 		"erpnext_uyn_customizations.client.sync_sales_order_contact"
+ 	]
 }
 # scheduler_events = {
 # 	"all": [
