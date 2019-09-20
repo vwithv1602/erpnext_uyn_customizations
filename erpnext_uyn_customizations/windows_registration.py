@@ -80,3 +80,7 @@ def update_table(current_time, serial_no, process):
     update_query = """update `tabSerial No` set {0} = '{1}' where name = '{2}'""".format(process_to_column_map[process],current_time,serial_no)
     frappe.db.sql(update_query,as_dict=1)
     frappe.db.commit()
+    if process == 'installation':
+        update_query = """update `tabSerial No` set initiation_time = NULL where name = '{0}'""".format(serial_no)
+        frappe.db.sql(update_query,as_dict=1)
+        frappe.db.commit()
