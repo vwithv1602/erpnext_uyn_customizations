@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from datetime import datetime,timedelta,date
+from sets import Set
 from erpnext_ebay.vlog import vwrite
 
 class ProductivityInsights(object):
@@ -271,147 +272,138 @@ class ProductivityInsights(object):
         return first_day, last_day
 
     def get_company_net_productivity(self):
-        net_today = """ 
+        net_today_part_one = """ 
+            select distinct sed.serial_no from `tabStock Entry Detail` sed 
+            inner join `tabStock Entry` se on sed.parent = se.name 
+            inner join `tabItem` i on i.name=sed.item_code 
+            where 
+            i.item_group in ("Desktops","Laptops") and 
+            se.posting_date='{0}' and 
             (
-                select count(distinct sed.serial_no) as daily from `tabStock Entry Detail` sed 
-                inner join `tabStock Entry` se on sed.parent = se.name 
-                inner join `tabItem` i on i.name=sed.item_code 
-                where 
-                i.item_group in ("Desktops","Laptops") and 
-                se.posting_date='{1}' and 
-                (
-                    (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
-                    or 
-                    (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
-                ) and 
-                se.purpose = 'Material Transfer' and 
-                se.docstatus=1 and 
-                sed.serial_no not in 
-                (
-                    select sed.serial_no from `tabStock Entry Detail` sed 
-                    inner join `tabStock Entry` se on sed.parent = se.name 
-                    inner join `tabItem` i on i.name=sed.item_code 
-                    where i.item_group in ("Desktops","Laptops") and 
-                    se.posting_date<'{1}' and 
-                    se.posting_date>='{2}' and 
-                    (
-                        (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
-                        or 
-                        (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
-                    ) and 
-                    se.purpose = 'Material Transfer' and 
-                    se.docstatus=1
-                )
-            )
-            union 
+                (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                or 
+                (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+            ) and 
+            se.purpose = 'Material Transfer' and 
+            se.docstatus=1 
+            """.format(self.selected_date_str)
+        net_today_part_two = """
+            select sed.serial_no from `tabStock Entry Detail` sed 
+            inner join `tabStock Entry` se on sed.parent = se.name 
+            inner join `tabItem` i on i.name=sed.item_code 
+            where i.item_group in ("Desktops","Laptops") and 
+            se.posting_date<'{0}' and 
+            se.posting_date>='{1}' and 
             (
-                select count(distinct dni.serial_no) as Daily from `tabDelivery Note Item` dni 
-                inner join `tabDelivery Note` dn on dn.name=dni.parent 
-                inner join `tabItem` i on i.name=dni.item_code 
-                where 
-                i.item_group in ('Desktops','Laptops') and 
-                dn.posting_date='{1}' and 
-                dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
-                dn.docstatus=1 and 
-                dn.is_return=0
-            )
-        """.format("%Macbook%",self.selected_date_str,self.two_months_before_date)
-        net_week = """
+                (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                or 
+                (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+            ) and 
+            se.purpose = 'Material Transfer' and 
+            se.docstatus=1
+            """.format(self.selected_date_str,self.two_months_before_date)
+        net_today_part_three = """
+            select count(distinct dni.serial_no) as Daily from `tabDelivery Note Item` dni 
+            inner join `tabDelivery Note` dn on dn.name=dni.parent 
+            inner join `tabItem` i on i.name=dni.item_code 
+            where 
+            i.item_group in ('Desktops','Laptops') and 
+            dn.posting_date='{0}' and 
+            dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
+            dn.docstatus=1 and 
+            dn.is_return=0
+            """.format(self.selected_date_str)
+        net_week_part_one = """
+            select distinct sed.serial_no from `tabStock Entry Detail` sed 
+            inner join `tabStock Entry` se on sed.parent = se.name 
+            inner join `tabItem` i on i.name=sed.item_code 
+            where 
+            i.item_group in ("Desktops","Laptops") and 
+            se.posting_date>='{0}' and 
+            se.posting_date<='{1}' and 
+            (   
+                (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                or 
+                (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+            ) and 
+            se.purpose = 'Material Transfer'and 
+            se.docstatus=1 
+            """.format(self.weekstartstr,self.weekendstr)
+        
+        net_week_part_two = """
+            select sed.serial_no from `tabStock Entry Detail` sed 
+            inner join `tabStock Entry` se on sed.parent = se.name 
+            inner join `tabItem` i on i.name=sed.item_code 
+            where 
+            i.item_group in ("Desktops","Laptops") and 
+            se.posting_date<'{0}' and 
+            se.posting_date>='{1}' and 
             (
-                select count(distinct sed.serial_no) as weekly from `tabStock Entry Detail` sed 
-                inner join `tabStock Entry` se on sed.parent = se.name 
-                inner join `tabItem` i on i.name=sed.item_code 
-                where 
-                i.item_group in ("Desktops","Laptops") and 
-                se.posting_date>='{0}' and 
-                se.posting_date<='{1}' and 
-                (   
-                    (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
-                    or 
-                    (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
-                ) and 
-                se.purpose = 'Material Transfer'and 
-                se.docstatus=1 and 
-                sed.serial_no not in 
-                (
-                    select sed.serial_no from `tabStock Entry Detail` sed 
-                    inner join `tabStock Entry` se on sed.parent = se.name 
-                    inner join `tabItem` i on i.name=sed.item_code 
-                    where 
-                    i.item_group in ("Desktops","Laptops") and 
-                    se.posting_date<'{0}' and 
-                    se.posting_date>='{4}' and 
-                    (
-                        (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
-                        or 
-                        (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
-                    ) and 
-                    se.purpose = 'Material Transfer' and 
-                    se.docstatus=1
-                )
-            ) 
-            union 
+                (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                or 
+                (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+            ) and 
+            se.purpose = 'Material Transfer' and 
+            se.docstatus=1
+            """.format(self.weekstartstr,self.two_months_before_week)
+        
+        net_week_part_three = """
+            select count(distinct dni.serial_no) as weekly from `tabDelivery Note Item` dni 
+            inner join `tabDelivery Note` dn on dn.name=dni.parent 
+            inner join `tabItem` i on i.name=dni.item_code 
+            where 
+            i.item_group in ('Desktops','Laptops') and 
+            dn.posting_date>='{0}' and 
+            dn.posting_date<='{1}' and 
+            dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
+            dn.docstatus=1 and 
+            dn.is_return=0
+            """.format(self.weekstartstr,self.weekendstr)
+        net_month_part_one = """
+            select distinct sed.serial_no from `tabStock Entry Detail` sed 
+            inner join `tabStock Entry` se on sed.parent = se.name 
+            inner join `tabItem` i on i.name=sed.item_code 
+            where 
+            i.item_group in ("Desktops","Laptops") and 
+            MONTH(se.posting_date)=MONTH('{0}') and 
+            YEAR(se.posting_date)=YEAR('{0}') and
             (
-                select count(distinct dni.serial_no) as weekly from `tabDelivery Note Item` dni 
-                inner join `tabDelivery Note` dn on dn.name=dni.parent 
-                inner join `tabItem` i on i.name=dni.item_code 
-                where 
-                i.item_group in ('Desktops','Laptops') and 
-                dn.posting_date>='{0}' and 
-                dn.posting_date<='{1}' and 
-                dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
-                dn.docstatus=1 and 
-                dn.is_return=0
-            )
-             """.format(self.weekstartstr,self.weekendstr,"%Macbook%",self.selected_date_str,self.two_months_before_week)
-        net_month = """
+                (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                or 
+                (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+            ) and 
+            se.purpose = 'Material Transfer'and 
+            se.docstatus=1 
+            """.format(self.selected_date_str)
+        net_month_part_two = """
+            select sed.serial_no from `tabStock Entry Detail` sed 
+            inner join `tabStock Entry` se on sed.parent = se.name 
+            inner join `tabItem` i on i.name=sed.item_code 
+            where 
+            i.item_group in ("Desktops","Laptops") and
+            se.posting_date>='{0}' and
+            se.posting_date<'{1}' and
             (
-                select count(distinct sed.serial_no) as monthly from `tabStock Entry Detail` sed 
-                inner join `tabStock Entry` se on sed.parent = se.name 
-                inner join `tabItem` i on i.name=sed.item_code 
-                where 
-                i.item_group in ("Desktops","Laptops") and 
-                MONTH(se.posting_date)=MONTH('{1}') and 
-                YEAR(se.posting_date)=YEAR('{1}') and
-                (
-                    (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
-                    or 
-                    (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
-                ) and 
-                se.purpose = 'Material Transfer'and 
-                se.docstatus=1 and 
-                sed.serial_no not in 
-                (
-                    select sed.serial_no from `tabStock Entry Detail` sed 
-                    inner join `tabStock Entry` se on sed.parent = se.name 
-                    inner join `tabItem` i on i.name=sed.item_code 
-                    where 
-                    i.item_group in ("Desktops","Laptops") and
-                    se.posting_date>='{2}' and
-                    se.posting_date<'{3}' and
-                    (
-                        (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
-                        or 
-                        (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
-                    ) and 
-                    se.purpose = 'Material Transfer' and 
-                    se.docstatus=1
-                )
-            ) 
-            union 
-            (
-                select count(distinct dni.serial_no) as monthly from `tabDelivery Note Item` dni 
-                inner join `tabDelivery Note` dn on dn.name=dni.parent 
-                inner join `tabItem` i on i.name=dni.item_code 
-                where 
-                i.item_group in ('Desktops','Laptops') and 
-                MONTH(dn.posting_date)=MONTH('{1}') and
-                YEAR(dn.posting_date)=YEAR('{1}') and
-                dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
-                dn.docstatus=1 and 
-                dn.is_return=0
-            )
-            """.format("%Macbook%",self.selected_date_str,self.two_months_before_cur_month,str(self.selected_date_obj.replace(day=1)))
+                (sed.t_warehouse='G3 Ready To Ship - Uyn' and sed.s_warehouse!='Amazon Warehouse - Uyn') 
+                or 
+                (sed.t_warehouse='Amazon Warehouse - Uyn' and sed.s_warehouse!='G3 Ready To Ship - Uyn')
+            ) and 
+            se.purpose = 'Material Transfer' and 
+            se.docstatus=1
+            """.format(self.two_months_before_cur_month,str(self.selected_date_obj.replace(day=1)))
+        
+        net_month_part_three = """
+            select count(distinct dni.serial_no) as monthly from `tabDelivery Note Item` dni 
+            inner join `tabDelivery Note` dn on dn.name=dni.parent 
+            inner join `tabItem` i on i.name=dni.item_code 
+            where 
+            i.item_group in ('Desktops','Laptops') and 
+            MONTH(dn.posting_date)=MONTH('{0}') and
+            YEAR(dn.posting_date)=YEAR('{0}') and
+            dni.warehouse not in ('Amazon Warehouse - Uyn','G3 Ready To Ship - Uyn') and 
+            dn.docstatus=1 and 
+            dn.is_return=0
+            """.format(self.selected_date_str)
         gross_today = """ 
             (select count(sed.serial_no) as daily from `tabStock Entry` se inner join `tabStock Entry Detail` sed on sed.parent=se.name inner join tabItem i on i.item_code=sed.item_code where i.item_group in ('Laptops','Desktops') and se.posting_date = '{1}' and sed.t_warehouse='G3 Ready To Ship - Uyn' and se.docstatus=1 and se.purpose='Material Transfer')
             union
@@ -439,15 +431,70 @@ class ProductivityInsights(object):
         daily_gross_prod_res = 0
         weekly_gross_prod_res = 0
         montly_gross_prod_res = 0
-        for net_prod in frappe.db.sql(net_today,as_dict=1):
-            if net_prod.get("daily"):
-				daily_net_prod_res += net_prod.get("daily")
-        for net_prod in frappe.db.sql(net_week,as_dict=1):
-            if net_prod.get("weekly"):
-				weekly_net_prod_res += net_prod.get("weekly")        
-        for net_prod in frappe.db.sql(net_month,as_dict=1):
-            if net_prod.get("monthly"):
-                montly_net_prod_res += net_prod.get("monthly")
+
+        ###############################################################################
+        ########### Net Daily Start ###################################################
+        net_day_part_one_set = Set()
+        for net_prod_dict in frappe.db.sql(net_today_part_one,as_dict=1):
+            net_day_part_one_set.add(net_prod_dict['serial_no'])
+        
+        net_day_part_two_set = Set()
+        for net_prod_dict in frappe.db.sql(net_today_part_two,as_dict=1):
+            net_day_part_two_set.add(net_prod_dict['serial_no'])
+        
+        daily_net_prod_res = len(list(net_day_part_one_set - net_day_part_two_set))
+
+        net_day_part_three_dict = frappe.db.sql(net_today_part_three,as_dict=1)
+        
+        for i in net_day_part_three_dict:
+            if i.get("Daily"):
+                daily_net_prod_res += i.get("Daily")
+        
+        ########### Net Daily End #####################################################
+        ###############################################################################
+
+        ###############################################################################
+        ########### Net Weekly Start ##################################################
+
+        net_week_part_one_set = Set()
+        for net_prod_dict in frappe.db.sql(net_week_part_one,as_dict=1):
+            net_week_part_one_set.add(net_prod_dict['serial_no'])
+        
+        net_week_part_two_set = Set()
+        for net_prod_dict in frappe.db.sql(net_week_part_two,as_dict=1):
+            net_week_part_two_set.add(net_prod_dict['serial_no'])
+        
+        weekly_net_prod_res = len(list(net_week_part_one_set - net_week_part_two_set))
+
+        net_week_part_three_dict = frappe.db.sql(net_week_part_three,as_dict=1)
+        for i in net_week_part_three_dict:
+            if i.get("weekly"):
+                weekly_net_prod_res += i.get("weekly")
+
+        ########## Net Weekly End #####################################################
+        ###############################################################################
+
+        ###############################################################################
+        ########## Net Month Start ####################################################
+
+        net_month_part_one_set = Set()
+        for net_prod_dict in frappe.db.sql(net_month_part_one,as_dict=1):
+            net_month_part_one_set.add(net_prod_dict['serial_no'])
+        
+        net_month_part_two_set = Set()
+        for net_prod_dict in frappe.db.sql(net_month_part_two,as_dict=1):
+            net_month_part_two_set.add(net_prod_dict['serial_no'])
+        
+        montly_net_prod_res = len(list(net_month_part_one_set - net_month_part_two_set))
+
+        net_month_part_three_dict = frappe.db.sql(net_month_part_three,as_dict=1)
+        for i in net_month_part_three_dict:
+            if i.get("monthly"):
+                montly_net_prod_res += i.get("monthly")
+
+        ###############################################################################
+        ######### Net Month End #######################################################
+
         for gross_prod in frappe.db.sql(gross_today,as_dict=1):
 			if gross_prod.get("daily"):
 				daily_gross_prod_res += gross_prod.get("daily")
