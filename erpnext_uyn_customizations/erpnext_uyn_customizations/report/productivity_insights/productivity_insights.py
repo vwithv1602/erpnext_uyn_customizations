@@ -78,6 +78,9 @@ class ProductivityInsights(object):
         warehouse_sequence_sql = """ select warehouse_name,warehouse_sequence_number,warehouse_inspection_type from `tabWarehouse` where warehouse_sequence_number<>'' """
         warehouse_sequence_res = frappe.db.sql(warehouse_sequence_sql,as_dict=1)
         for warehouse in warehouse_sequence_res:
+            if "incoming & Dis-assebly" in warehouse.get("warehouse_name"):
+                continue
+
             total_gross_day = 0
             total_net_day = 0
             total_daily_rejects = 0
@@ -119,7 +122,8 @@ class ProductivityInsights(object):
             net_day_res = frappe.db.sql(net_day_sql,as_dict=1)
             for row in net_day_res:
                 if row.get("owner") in active_employees:
-                    employees[row.get("owner")]['net_day'] = row.get("count")
+                    if row.get("count") > 0:
+                        employees[row.get("owner")]['net_day'] = row.get("count")
 
             # Gross Weekly
             gross_week_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
@@ -144,8 +148,7 @@ class ProductivityInsights(object):
                 Group By A.owner """.format(self.weekstartstr,self.weekendstr,warehouse.get("warehouse_inspection_type"))
             net_week_res = frappe.db.sql(net_week_sql,as_dict=1)
             for row in net_week_res:
-                if row.get("owner") in active_employees:
-                    employees[row.get("owner")]['net_week'] = row.get("count")
+                employees[row.get("owner")]['net_week'] = row.get("count")
             # Gross Monthly
             gross_month_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A
@@ -177,7 +180,8 @@ class ProductivityInsights(object):
                 daily_rejects = self.get_rejects(employee,'daily',warehouse.get("warehouse_inspection_type"))
                 weekly_rejects = self.get_rejects(employee,'weekly',warehouse.get("warehouse_inspection_type"))
                 monthly_rejects = self.get_rejects(employee,'monthly',warehouse.get("warehouse_inspection_type"))
-                data.append([employee,productivity.get("gross_day"),productivity.get("net_day"),daily_rejects,productivity.get("gross_week"),productivity.get("net_week"),weekly_rejects,productivity.get("gross_month"),"<b>"+str(productivity.get("net_month"))+"</b>",monthly_rejects])
+                if productivity.get("gross_day") > 0:
+                    data.append([employee,productivity.get("gross_day"),productivity.get("net_day"),daily_rejects,productivity.get("gross_week"),productivity.get("net_week"),weekly_rejects,productivity.get("gross_month"),"<b>"+str(productivity.get("net_month"))+"</b>",monthly_rejects])
                 #Total for day
                 total_gross_day += int(productivity.get('gross_day') or 0)
                 total_net_day += int(productivity.get('net_day') or 0)
@@ -578,7 +582,3 @@ def execute(filters=None):
 
     }
     return ProductivityInsights(filters).run(args)
-
-
-
-
