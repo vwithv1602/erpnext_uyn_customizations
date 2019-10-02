@@ -48,7 +48,6 @@ def get_data():
 			else:
 				models_to_count_map[model] = 0
 	
-	models_to_count_map = [[x,y] for x,y in models_to_count_map.items() if y!=0]
 	return models_to_count_map
 
 
