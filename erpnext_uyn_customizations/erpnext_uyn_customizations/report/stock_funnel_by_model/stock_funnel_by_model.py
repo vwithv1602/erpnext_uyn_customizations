@@ -11,7 +11,7 @@ from erpnext_ebay.vlog import vwrite
 def get_columns():
         columns = [
             _("Models") + ":Data:180",
-            _("Count") + ":Data:100"
+            _("Count") + ":Int:100"
         ]
         return columns
 def get_models_to_item_code():
