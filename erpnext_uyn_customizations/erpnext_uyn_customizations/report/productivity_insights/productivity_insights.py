@@ -114,7 +114,7 @@ class ProductivityInsights(object):
             net_day_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A 
                 inner join 
-                (select item_serial_no,max(creation) as max_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.max_creation)
+                (select item_serial_no,min(creation) as min_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.min_creation)
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code
                 where A.creation > '{0}' and A.creation < '{1}' and A.docstatus = 1
@@ -141,7 +141,7 @@ class ProductivityInsights(object):
             net_week_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A 
                 inner join 
-                (select item_serial_no,max(creation) as max_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.max_creation)
+                (select item_serial_no,min(creation) as min_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.min_creation)
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code
                 where A.creation >= '{0}' and A.creation <= '{1}' and A.docstatus = 1
@@ -165,7 +165,7 @@ class ProductivityInsights(object):
             net_month_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A 
                 inner join 
-                (select item_serial_no,max(creation) as max_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.max_creation)
+                (select item_serial_no,min(creation) as min_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.min_creation)
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code
                 where A.creation > '{0}' and A.creation < '{1}' and A.docstatus = 1
