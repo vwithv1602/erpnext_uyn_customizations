@@ -99,26 +99,26 @@ class ProductivityInsights(object):
             location = len(data) - 1
 
             # Gross Daily
-            gross_day_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
+            gross_day_sql = """ select A.inspected_by as owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A
                 inner join `tabSerial No` sn on sn.name = A.item_serial_no
                 inner join `tabItem` i on i.name = sn.item_code 
                 where A.creation > '{0}' and A.creation < '{1}' and A.docstatus = 1 and A.inspection_type='{2}'
-                Group By A.owner """.format(self.selected_date_str,self.tomorrow_date_str,warehouse.get("warehouse_inspection_type"))
+                Group By A.inspected_by """.format(self.selected_date_str,self.tomorrow_date_str,warehouse.get("warehouse_inspection_type"))
             gross_day_res = frappe.db.sql(gross_day_sql,as_dict=1)
             for row in gross_day_res:
                 if row.get("owner") in active_employees:
                     employees[row.get("owner")] = {'gross_day': row.get("count")}
 
             # Net Daily
-            net_day_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
+            net_day_sql = """ select A.inspected_by as owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A 
                 inner join 
                 (select item_serial_no,min(creation) as min_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.min_creation)
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code
                 where A.creation > '{0}' and A.creation < '{1}' and A.docstatus = 1
-                Group By A.owner """.format(self.selected_date_str,self.tomorrow_date_str,warehouse.get("warehouse_inspection_type"))
+                Group By A.inspected_by """.format(self.selected_date_str,self.tomorrow_date_str,warehouse.get("warehouse_inspection_type"))
             net_day_res = frappe.db.sql(net_day_sql,as_dict=1)
             for row in net_day_res:
                 if row.get("owner") in active_employees:
@@ -126,50 +126,50 @@ class ProductivityInsights(object):
                         employees[row.get("owner")]['net_day'] = row.get("count")
 
             # Gross Weekly
-            gross_week_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
+            gross_week_sql = """ select A.inspected_by as owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code 
                 where A.creation >= '{0}' and A.creation <= '{1}' and A.docstatus = 1 and A.inspection_type='{2}'
-                Group By A.owner """.format(self.weekstartstr,self.weekendstr,warehouse.get("warehouse_inspection_type"))
+                Group By A.inspected_by """.format(self.weekstartstr,self.weekendstr,warehouse.get("warehouse_inspection_type"))
             gross_week_res = frappe.db.sql(gross_week_sql,as_dict=1)
             for row in gross_week_res:
                 if row.get("owner") in active_employees:
                     employees[row.get("owner")]['gross_week'] = row.get("count")
 
             # Net Weekly
-            net_week_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
+            net_week_sql = """ select A.inspected_by as owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A 
                 inner join 
                 (select item_serial_no,min(creation) as min_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.min_creation)
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code
                 where A.creation >= '{0}' and A.creation <= '{1}' and A.docstatus = 1
-                Group By A.owner """.format(self.weekstartstr,self.weekendstr,warehouse.get("warehouse_inspection_type"))
+                Group By A.inspected_by """.format(self.weekstartstr,self.weekendstr,warehouse.get("warehouse_inspection_type"))
             net_week_res = frappe.db.sql(net_week_sql,as_dict=1)
             for row in net_week_res:
                 employees[row.get("owner")]['net_week'] = row.get("count")
             # Gross Monthly
-            gross_month_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
+            gross_month_sql = """ select A.inspected_by as owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A
                 inner join `tabSerial No` sn on sn.name = A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code 
                 where A.creation > '{0}' and A.creation < '{1}' and A.docstatus = 1 and A.inspection_type='{2}'
-                Group By A.owner """.format(self.monthstartstr,self.monthendstr,warehouse.get("warehouse_inspection_type"))
+                Group By A.inspected_by """.format(self.monthstartstr,self.monthendstr,warehouse.get("warehouse_inspection_type"))
             gross_month_res = frappe.db.sql(gross_month_sql,as_dict=1)
             for row in gross_month_res:
                 if row.get("owner") in active_employees:
                     employees[row.get("owner")]['gross_month'] = row.get("count")
 
             # Net Monthly
-            net_month_sql = """ select A.owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
+            net_month_sql = """ select A.inspected_by as owner,ROUND(sum(i.productivity_multiplier)) as count,A.creation,A.name
                 from `tabQuality Inspection` as A 
                 inner join 
                 (select item_serial_no,min(creation) as min_creation from `tabQuality Inspection` where docstatus =1 and inspection_type = '{2}' group by item_serial_no ) as B on (A.item_serial_no= B.item_serial_no and A.creation = B.min_creation)
                 inner join `tabSerial No` sn on sn.name=A.item_serial_no
                 inner join `tabItem` i on i.name=sn.item_code
                 where A.creation > '{0}' and A.creation < '{1}' and A.docstatus = 1
-                Group By A.owner """.format(self.monthstartstr,self.monthendstr,warehouse.get("warehouse_inspection_type"))
+                Group By A.inspected_by """.format(self.monthstartstr,self.monthendstr,warehouse.get("warehouse_inspection_type"))
             net_month_res = frappe.db.sql(net_month_sql,as_dict=1)
             for row in net_month_res:
                 if row.get("owner") in active_employees:
