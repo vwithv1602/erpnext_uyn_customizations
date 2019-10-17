@@ -32,8 +32,10 @@ def count_serial_numbers_with_app_installed_in_week():
 	inner join `tabDelivery Note` dn on dn.name = dni.parent
 	where
 		dn.docstatus = 1 and
+		dn.is_return = 0 and
 		sn.installation_time is not NULL and
-		dn.posting_date > '{0}' and
+		sn.item_group = 'Laptops' and
+		dn.posting_date >= '{0}' and
 		dn.posting_date <= '{1}'
 	""".format(str(weeks_first_day),str(weeks_last_day))
 	count_dict = frappe.db.sql(serial_numbers_with_app_installed_query,as_dict=1)
