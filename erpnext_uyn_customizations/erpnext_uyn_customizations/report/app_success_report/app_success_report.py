@@ -59,7 +59,7 @@ def count_of_laptops_registered_within(lt_days,gt_days):
 		a.modified <= '{1}' and
 		DATEDIFF(a.modified,sn.initiation_time) <= {2} and
 		DATEDIFF(a.modified,sn.initiation_time) > {3}
-	""".format(weeks_first_day,weeks_last_day,lt_days,gt_days)
+	""".format(weeks_first_day.date(),weeks_last_day.date(),lt_days,gt_days)
 	count_dict = frappe.db.sql(count_of_laptops_registered_query,as_dict=1)
 	return count_dict
 
