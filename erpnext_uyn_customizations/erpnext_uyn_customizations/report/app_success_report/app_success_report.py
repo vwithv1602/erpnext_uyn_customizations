@@ -37,7 +37,7 @@ def count_serial_numbers_with_app_installed_in_week():
 		sn.item_group = 'Laptops' and
 		dn.posting_date >= '{0}' and
 		dn.posting_date <= '{1}'
-	""".format(str(weeks_first_day),str(weeks_last_day))
+	""".format(str(weeks_first_day.date()),str(weeks_last_day.date()))
 	count_dict = frappe.db.sql(serial_numbers_with_app_installed_query,as_dict=1)
 	return count_dict
 
