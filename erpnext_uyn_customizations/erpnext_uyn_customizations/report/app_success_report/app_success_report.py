@@ -52,11 +52,10 @@ def count_of_laptops_registered_within(lt_days,gt_days):
 	where
 		dn.docstatus = 1 and
 		dn.is_return = 0 and
-		(sn.warehouse is NULL or sn.warehouse = '') and
 		a.modified_by = 'it@usedyetnew.com' and
 		sn.initiation_time is not NULL and
-		a.modified > '{0}' and
-		a.modified <= '{1}' and
+		DATE(a.modified) > '{0}' and
+		DATE(a.modified) <= '{1}' and
 		DATEDIFF(a.modified,sn.initiation_time) <= {2} and
 		DATEDIFF(a.modified,sn.initiation_time) > {3}
 	""".format(weeks_first_day.date(),weeks_last_day.date(),lt_days,gt_days)
