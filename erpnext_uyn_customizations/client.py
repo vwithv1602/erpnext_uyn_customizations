@@ -50,7 +50,7 @@ def get_sync_attributes_by_item_group(item_group="Laptops"):
     sync_attribute_result = frappe.db.sql(sync_attribute_query,as_dict=1)
     return sync_attribute_result
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_doctype_details(doctype, fields=None, filters=None, order_by=None,limit_start=None, limit_page_length=20, parent=None):
     # filters = ast.literal_eval(filters)
     filters = json.loads(filters)
