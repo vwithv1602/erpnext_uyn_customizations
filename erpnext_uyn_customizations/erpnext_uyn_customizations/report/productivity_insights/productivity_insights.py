@@ -153,7 +153,8 @@ class ProductivityInsights(object):
                 Group By A.inspected_by """.format(self.weekstartstr,self.weekendstr,warehouse.get("warehouse_inspection_type"),productivity_multiplier_mapping.get(warehouse.get("warehouse_inspection_type")))
             net_week_res = frappe.db.sql(net_week_sql,as_dict=1)
             for row in net_week_res:
-                employees[row.get("owner")]['net_week'] = row.get("count")
+                if row.get("owner") in active_employees:
+                    employees[row.get("owner")]['net_week'] = row.get("count")
             # Gross Monthly
             gross_month_sql = """ select A.inspected_by as owner,ROUND(sum(i.{3})) as count,A.creation,A.name
                 from `tabQuality Inspection` as A
