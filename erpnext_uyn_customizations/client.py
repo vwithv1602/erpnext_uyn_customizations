@@ -475,3 +475,8 @@ def check_for_repeated_mreq(item_code,serial_no):
         result += mreq_dict["name"]
     
     return {"mr_no":result}
+
+@frappe.whitelist()
+def get_item_group(item_code):
+    item_group = frappe.get_value("Item",item_code,"item_group")
+    return item_group
