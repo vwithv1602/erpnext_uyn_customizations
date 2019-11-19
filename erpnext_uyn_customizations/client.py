@@ -7,6 +7,7 @@ from frappe import _
 import frappe.model
 import frappe.utils
 import json, os
+from six import string_types
 import ast
 from frappe.utils.background_jobs import enqueue
 #from parse_erpnext_connector import parse_quality_inspection_report
@@ -480,3 +481,46 @@ def check_for_repeated_mreq(item_code,serial_no):
 def get_item_group(item_code):
     item_group = frappe.get_value("Item",item_code,"item_group")
     return item_group
+
+@frappe.whitelist()
+def export_query(data):
+    """export from query reports"""
+
+    #data = frappe._dict(frappe.local.form_dict)
+
+    filters = json.loads(data)
+    report_name = 'General Ledger'
+    file_format_type = "Excel"
+
+    if file_format_type == "Excel":
+        from frappe.desk.query_report import run,get_columns_dict
+        data = run(report_name, filters)
+        data = frappe._dict(data)
+        columns = get_columns_dict(data.columns)
+
+        result = [[]]
+
+        # add column headings
+        for idx in range(len(data.columns)):
+            result[0].append(columns[idx]["label"])
+
+        # build table from dict
+        if isinstance(data.result[0], dict):
+            for i,row in enumerate(data.result):
+                # only rows which are visible in the report
+                if row:
+                    row_list = []
+                    for idx in range(len(data.columns)):
+                        row_list.append(row.get(columns[idx]["fieldname"],""))
+                    result.append(row_list)
+                elif not row:
+                    result.append([])
+        else:
+            result = result + [d for i,d in enumerate(data.result)]
+
+        from frappe.utils.xlsxutils import make_xlsx
+        xlsx_file = make_xlsx(result, "Query Report")
+
+        frappe.response['filename'] = filters['account'] + '.xlsx'
+        frappe.response['filecontent'] = xlsx_file.getvalue()
+        frappe.response['type'] = 'binary'
